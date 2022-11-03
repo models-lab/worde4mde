@@ -21,6 +21,9 @@ def training_w2v(args, sentences):
 
 def test_word2vec(args):
     reloaded_word_vectors = KeyedVectors.load(os.path.join(args.embeddings_out, 'vectors.kv'))
-    for word in ['state', 'sql', 'assignment', 'petri']:
+    for word in ['state', 'sql',
+                 'assignment', 'petri',
+                 'father', 'name', 'atl',
+                 'graph', 'classroom']:
         logger.info(f'Most similar {word}: {reloaded_word_vectors.most_similar(positive=[word])}')
 
