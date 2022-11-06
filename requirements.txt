@@ -1,3 +1,5 @@
 pdftotext
 nltk
 gensim
+yellowbrick
+scikit-learn

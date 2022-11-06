@@ -1,12 +1,20 @@
 import logging
 import os
 
+import gensim.downloader as api
+import matplotlib.pyplot as plt
 from gensim.models import Word2Vec, KeyedVectors
+from sklearn.cluster import KMeans
+from sklearn.manifold import TSNE
+from yellowbrick.cluster import KElbowVisualizer
 
 logger = logging.getLogger()
 
+DEFAULT_VECTORS_NAME = 'vectors.kv'
+DEFAULT_FIG_NAME = 'out.pdf'
 
-def training_w2v(args, sentences):
+
+def training_word2vec(args, sentences):
     model = Word2Vec(sentences=sentences, vector_size=300,
                      min_count=10, window=10, workers=10, epochs=10,
                      seed=args.seed)
@@ -14,16 +22,46 @@ def training_w2v(args, sentences):
 
     if not os.path.exists(args.embeddings_out):
         os.makedirs(args.embeddings_out)
-    model.wv.save(os.path.join(args.embeddings_out, 'vectors.kv'))
+    model.wv.save(os.path.join(args.embeddings_out, DEFAULT_VECTORS_NAME))
     # print(list(model.wv.key_to_index))
     # print(model.wv['state'])
 
 
-def test_word2vec(args):
-    reloaded_word_vectors = KeyedVectors.load(os.path.join(args.embeddings_out, 'vectors.kv'))
+def load_model(args):
+    if args.model == 'word2vec-mde':
+        reloaded_word_vectors = KeyedVectors.load(os.path.join(args.embeddings_out, DEFAULT_VECTORS_NAME))
+    else:
+        reloaded_word_vectors = api.load(args.model)
+    return reloaded_word_vectors
+
+
+def test_similarity_word2vec(args):
+    reloaded_word_vectors = load_model(args)
     for word in ['state', 'sql',
                  'assignment', 'petri',
                  'father', 'name', 'atl',
                  'graph', 'classroom']:
         logger.info(f'Most similar {word}: {reloaded_word_vectors.most_similar(positive=[word])}')
 
+
+def test_kmeans_word2vec(args):
+    reloaded_word_vectors = load_model(args)
+
+    model = KMeans(random_state=args.seed, verbose=True)
+    visualizer = KElbowVisualizer(model,
+                                  metric='distortion',
+                                  k=list(range(10, 110, 10)),
+                                  timings=False)
+    visualizer.fit(reloaded_word_vectors.vectors)
+    visualizer.show(outpath=DEFAULT_FIG_NAME, clear_figure=True)
+
+
+def visualize_embeddings(args):
+    reloaded_word_vectors = load_model(args)
+    X_embedded = TSNE(n_components=2,
+                      learning_rate='auto',
+                      init='random',
+                      perplexity=40,
+                      random_state=args.seed).fit_transform(reloaded_word_vectors.vectors)
+    plt.scatter(X_embedded[:, 0], X_embedded[:, 1], s=1, alpha=0.4)
+    plt.savefig(DEFAULT_FIG_NAME)
