@@ -9,7 +9,7 @@ pip install -r requirements.txt
 python -m nltk.downloader all
 ```
 
-Download the dataset and put it in a folder:
+Download the dataset of papers and put it in a folder:
 ```shell
 TODO
 ```
@@ -21,5 +21,15 @@ python main.py --train
 
 Test with it with word similarity:
 ```shell
-python main.py --test
+python main.py --test_similarity --model word2vec-mde
+```
+
+Meta-model classification task:
+```shell
+TODO
+```
+
+Meta-model concepts task:
+```shell
+TODO
 ```

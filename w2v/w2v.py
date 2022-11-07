@@ -37,10 +37,10 @@ def load_model(args):
 
 def test_similarity_word2vec(args):
     reloaded_word_vectors = load_model(args)
-    for word in ['state', 'sql',
+    for word in ['state', 'sql', 'transition',
                  'assignment', 'petri',
                  'father', 'name', 'atl',
-                 'graph', 'classroom']:
+                 'graph', 'classroom', 'transformation']:
         logger.info(f'Most similar {word}: {reloaded_word_vectors.most_similar(positive=[word])}')
 
 
