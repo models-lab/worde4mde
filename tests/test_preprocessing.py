@@ -3,9 +3,9 @@ import unittest
 import nltk
 import pdftotext
 
-from data.preprocess import preprocess_doc_to_sent, read_pdf
+from data.preprocess import preprocess_sentence, read_pdf, preprocess_doc
 
-FILE_TEST = 'docs/441118.pdf'
+FILE_TEST = 'docs/sosym/441118.pdf'
 nltk.download('punkt')
 
 
@@ -22,7 +22,11 @@ class TestPreprocessing(unittest.TestCase):
 
     def test_preprocess_doc_to_sent(self):
         all_pdf = read_pdf(FILE_TEST)
-        print(preprocess_doc_to_sent(all_pdf))
+        print(preprocess_sentence(all_pdf))
+
+    def test_preprocess_doc(self):
+        all_pdf = read_pdf(FILE_TEST)
+        print(preprocess_doc(all_pdf))
 
 
 if __name__ == '__main__':

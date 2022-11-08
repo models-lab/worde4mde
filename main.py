@@ -13,7 +13,7 @@ def main(args):
     if args.train:
         logger.info('Start preprocessing')
         tokenized_files = preprocess_dataset(args)
-        logger.info('Finish preprocessing')
+        logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
         training_word2vec(args, tokenized_files)
     if args.test_similarity:
         test_similarity_word2vec(args)

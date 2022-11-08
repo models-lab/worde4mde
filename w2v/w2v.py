@@ -16,8 +16,8 @@ DEFAULT_FIG_NAME = 'out.pdf'
 
 def training_word2vec(args, sentences):
     model = Word2Vec(sentences=sentences, vector_size=300,
-                     min_count=10, window=10, workers=10, epochs=10,
-                     seed=args.seed)
+                     min_count=10, window=10, workers=10, epochs=20,
+                     seed=args.seed, compute_loss=True, sg=1)
     logger.info(f'Vocab size: f{len(model.wv.key_to_index)}')
 
     if not os.path.exists(args.embeddings_out):
@@ -25,6 +25,10 @@ def training_word2vec(args, sentences):
     model.wv.save(os.path.join(args.embeddings_out, DEFAULT_VECTORS_NAME))
     # print(list(model.wv.key_to_index))
     # print(model.wv['state'])
+
+
+def training_glove(args, sentences):
+    pass
 
 
 def load_model(args):
@@ -39,7 +43,7 @@ def test_similarity_word2vec(args):
     reloaded_word_vectors = load_model(args)
     for word in ['state', 'sql', 'transition',
                  'assignment', 'petri',
-                 'father', 'name', 'atl',
+                 'father', 'name', 'epsilon',
                  'graph', 'classroom', 'transformation']:
         logger.info(f'Most similar {word}: {reloaded_word_vectors.most_similar(positive=[word])}')
 

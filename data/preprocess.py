@@ -2,7 +2,7 @@ import glob
 import re
 
 import pdftotext
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize
 from tqdm import tqdm
 
 
@@ -13,7 +13,7 @@ def read_pdf(file):
     return all_pdf
 
 
-def preprocess_doc_to_sent(string):
+def preprocess_sentence(string):
     # lower case
     string = string.lower()
 
@@ -30,11 +30,22 @@ def preprocess_doc_to_sent(string):
     return word_tokenize(string)
 
 
+def preprocess_doc(string):
+    # remove \n
+    string = re.sub(r'\n', ' ', string).strip()
+
+    # split in sentences
+    sentences = [preprocess_sentence(s) for s in sent_tokenize(string)]
+
+    # remove short sentences
+    return [s for s in sentences if len(s) > 5]
+
+
 def preprocess_dataset(args):
-    files = glob.glob(args.training_dataset + "/*.pdf")
+    files = glob.glob(args.training_dataset + "/**/*.pdf", recursive=True)
     result = []
     for f in tqdm(files, desc='Preprocessing files'):
         content = read_pdf(f)
-        tokens = preprocess_doc_to_sent(content)
-        result.append(tokens)
+        tokens = preprocess_doc(content)
+        result += tokens
     return result
