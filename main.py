@@ -58,6 +58,10 @@ if __name__ == '__main__':
     parser.add_argument('--visualize_embeddings', help='Tsne', action='store_true')
     parser.add_argument('--evaluation_metamodel_classification', help='Evaluate embeddings in metamodel classification',
                         action='store_true')
+    parser.add_argument('--remove_duplicates', help='Remove duplicate models', action='store_true')
+    parser.add_argument('--min_occurrences_per_category', help='Min occurences per category.', type=int, default=10)
+    parser.add_argument("--t0", dest="t0", help="t0 threshold.", type=float, default=0.8)
+    parser.add_argument("--t1", dest="t1",help="t1 threshold.", type=float, default=0.7)
     args = parser.parse_args()
 
     seed_everything(args.seed)

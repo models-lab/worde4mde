@@ -27,6 +27,7 @@ python main.py --test_similarity --model word2vec-mde
 Meta-model classification task:
 ```shell
 python -m modelset.downloader
+python main.py --evaluation_metamodel_classification
 ```
 
 Meta-model concepts task:
