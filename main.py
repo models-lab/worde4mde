@@ -5,7 +5,8 @@ from argparse import ArgumentParser
 import numpy as np
 
 from data.preprocess import preprocess_dataset
-from w2v.w2v import training_word2vec, test_similarity_word2vec, test_kmeans_word2vec, visualize_embeddings
+from modelset_evaluation.evaluation import evaluation_metamodel_classification
+from w2v.w2v import training_word2vec, test_similarity_word2vec, test_kmeans_word2vec, visualize_embeddings, MODELS
 
 
 def main(args):
@@ -21,6 +22,8 @@ def main(args):
         test_kmeans_word2vec(args)
     if args.visualize_embeddings:
         visualize_embeddings(args)
+    if args.evaluation_metamodel_classification:
+        evaluation_metamodel_classification(args)
 
 
 def seed_everything(seed):
@@ -45,15 +48,16 @@ if __name__ == '__main__':
     parser.add_argument('--embeddings_out', default='./out',
                         help='Path to the where the embeddings will be saved')
     parser.add_argument('--seed', help='seed.', type=int, default=123)
+    parser.add_argument('--folds', help='folds.', type=int, default=10)
     parser.add_argument('--model', default='word2vec-mde',
                         help='Path to the where the embeddings will be saved',
-                        choices=['word2vec-mde',
-                                 'glove-wiki-gigaword-300',
-                                 'word2vec-google-news-300'])
+                        choices=MODELS)
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--test_similarity', help='Test similarity w2v', action='store_true')
     parser.add_argument('--test_kmeans', help='Test kmeans w2v', action='store_true')
     parser.add_argument('--visualize_embeddings', help='Tsne', action='store_true')
+    parser.add_argument('--evaluation_metamodel_classification', help='Evaluate embeddings in metamodel classification',
+                        action='store_true')
     args = parser.parse_args()
 
     seed_everything(args.seed)

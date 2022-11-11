@@ -12,6 +12,9 @@ logger = logging.getLogger()
 
 DEFAULT_VECTORS_NAME = 'vectors.kv'
 DEFAULT_FIG_NAME = 'out.pdf'
+MODELS = ['word2vec-mde',
+          'glove-wiki-gigaword-300',
+          'word2vec-google-news-300']
 
 
 def training_word2vec(args, sentences):
@@ -31,16 +34,16 @@ def training_glove(args, sentences):
     pass
 
 
-def load_model(args):
-    if args.model == 'word2vec-mde':
-        reloaded_word_vectors = KeyedVectors.load(os.path.join(args.embeddings_out, DEFAULT_VECTORS_NAME))
+def load_model(model, embeddings_out=None):
+    if model == 'word2vec-mde':
+        reloaded_word_vectors = KeyedVectors.load(os.path.join(embeddings_out, DEFAULT_VECTORS_NAME))
     else:
-        reloaded_word_vectors = api.load(args.model)
+        reloaded_word_vectors = api.load(model)
     return reloaded_word_vectors
 
 
 def test_similarity_word2vec(args):
-    reloaded_word_vectors = load_model(args)
+    reloaded_word_vectors = load_model(args.model, args.embeddings_out)
     for word in ['state', 'sql', 'transition',
                  'assignment', 'petri',
                  'father', 'name', 'epsilon',
@@ -49,7 +52,7 @@ def test_similarity_word2vec(args):
 
 
 def test_kmeans_word2vec(args):
-    reloaded_word_vectors = load_model(args)
+    reloaded_word_vectors = load_model(args.model, args.embeddings_out)
 
     model = KMeans(random_state=args.seed, verbose=True)
     visualizer = KElbowVisualizer(model,
@@ -61,7 +64,7 @@ def test_kmeans_word2vec(args):
 
 
 def visualize_embeddings(args):
-    reloaded_word_vectors = load_model(args)
+    reloaded_word_vectors = load_model(args.model, args.embeddings_out)
     X_embedded = TSNE(n_components=2,
                       learning_rate='auto',
                       init='random',

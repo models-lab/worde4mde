@@ -3,3 +3,5 @@ nltk
 gensim
 yellowbrick
 scikit-learn
+modelset-py==0.2.0
+scikit-posthocs
