@@ -30,10 +30,6 @@ def training_word2vec(args, sentences):
     # print(model.wv['state'])
 
 
-def training_glove(args, sentences):
-    pass
-
-
 def load_model(model, embeddings_out=None):
     if model == 'word2vec-mde':
         reloaded_word_vectors = KeyedVectors.load(os.path.join(embeddings_out, DEFAULT_VECTORS_NAME))

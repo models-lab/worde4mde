@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 from argparse import ArgumentParser
 
@@ -31,6 +32,7 @@ def main(args):
 def seed_everything(seed):
     random.seed(seed)
     np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
 
 
 def setup_logger():
