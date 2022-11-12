@@ -27,9 +27,23 @@ public class ParserEcore extends Parser{
                 Collection<EObject> elements = (Collection<EObject>) obj.eGet(getFeature(eclassContext,
                         "eClassifiers"));
                 for (EObject classifier: elements){
-                    recommendations.add(classifier.eGet(getFeature(eclassContext, "name")).toString());
+                    recommendations.add(classifier.eGet(getFeature(classifier.eClass(),
+                            "name")).toString());
                 }
-                Item item = new Item(context, recommendations);
+                Item item = new Item(context, recommendations, "EPackage");
+                items.add(item);
+            } else if (eClassName.equals("EClass")) {
+                if (obj.eGet(getFeature(eclassContext, "name")) == null)
+                    continue;
+                String context = obj.eGet(getFeature(eclassContext, "name")).toString();
+                List<String> recommendations = new ArrayList<>();
+                Collection<EObject> elements = (Collection<EObject>) obj.eGet(getFeature(eclassContext,
+                        "eStructuralFeatures"));
+                for (EObject eStructuralFeature: elements){
+                    recommendations.add(eStructuralFeature.eGet(getFeature(eStructuralFeature.eClass(),
+                            "name")).toString());
+                }
+                Item item = new Item(context, recommendations, "EClass");
                 items.add(item);
             }
         }

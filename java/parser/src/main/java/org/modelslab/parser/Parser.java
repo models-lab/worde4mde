@@ -11,10 +11,12 @@ public abstract class Parser {
     public class Item {
         private final String context;
         private final List<String> recommendations;
+        private final String contextType;
 
-        public Item(String context, List<String> recommendations) {
+        public Item(String context, List<String> recommendations, String contextType) {
             this.context = context;
             this.recommendations = recommendations;
+            this.contextType = contextType;
         }
 
         public String getContext() {
@@ -23,6 +25,10 @@ public abstract class Parser {
 
         public List<String> getRecommendations() {
             return recommendations;
+        }
+
+        public String getContextType() {
+            return contextType;
         }
     }
 

@@ -1,5 +1,7 @@
 package org.modelslab.parser;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import me.tongfei.progressbar.ProgressBar;
 import org.apache.commons.cli.*;
 import org.apache.log4j.BasicConfigurator;
@@ -11,6 +13,10 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
@@ -21,37 +27,41 @@ public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
     private static final String MODELSET_HOME = Paths.get(System.getProperty("user.home"),
             ".modelset", "modelset").toString();
+    private static final String OUT_DIR_DEFAULT = Paths.get(System.getProperty("user.dir"),
+            "out").toString();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, ParseException {
         // logger
         BasicConfigurator.configure();
+
         // set up emf
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap( ).put("*", new XMIResourceFactoryImpl());
 
         // Options
         Options options = setUpOptions();
         CommandLineParser parser = new DefaultParser();
-        String modelSetPath = null;
-        try {
-            CommandLine cmd = parser.parse(options, args);
-            modelSetPath = cmd.getOptionValue("modelsetPath", MODELSET_HOME);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        CommandLine cmd = parser.parse(options, args);
+        String modelSetPath = cmd.getOptionValue("modelsetPath", MODELSET_HOME);
+        String outdir = cmd.getOptionValue("outdir", OUT_DIR_DEFAULT);
 
         // Query database
         List<String> fileNames = getFileNames(modelSetPath);
         Parser ecoreParser = new ParserEcore();
+        int counter = 0;
         for (String fileName : ProgressBar.wrap(fileNames, "Parsing procedure")) {
             ResourceSet rs = new ResourceSetImpl();
-            Resource resource = null;
-            try {
-                resource = rs.getResource(URI.createFileURI(fileName), true);
-            } catch (Exception e) {
-                continue;
-            }
+            Resource resource = rs.getResource(URI.createFileURI(fileName), true);
             List<Parser.Item> items = ecoreParser.parse(resource);
-            logger.debug("Number of items " + items.size());
+
+            // logger.debug("Number of items " + items.size());
+            File out = Paths.get(outdir, Integer.toString(counter) + ".json").toFile();
+            out.getParentFile().mkdirs();
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Writer writer = new FileWriter(out);
+            gson.toJson(items, writer);
+            writer.flush();
+            writer.close();
+            ++counter;
         }
 
     }
@@ -61,6 +71,10 @@ public class Main {
 
         Option modelSetPath = new Option("p", "modelsetPath", true, "ModelSet path");
         options.addOption(modelSetPath);
+
+        Option outPath = new Option("o", "outdir", true, "Output path");
+        options.addOption(outPath);
+
         return options;
     }
 

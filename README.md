@@ -7,6 +7,7 @@ python3.8 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python -m nltk.downloader all
+python -m modelset.downloader
 ```
 
 Download the dataset of papers and put it in a folder:
@@ -26,11 +27,19 @@ python main.py --test_similarity --model word2vec-mde
 
 Meta-model classification task:
 ```shell
-python -m modelset.downloader
 python main.py --evaluation_metamodel_classification
 ```
 
+Meta-model clustering task:
+```shell
+python main.py --evaluation_metamodel_classification
+```
+
+
 Meta-model concepts task:
 ```shell
-TODO
+cd java/parser
+mvn complie
+mvn exec:java
+cd ../..
 ```

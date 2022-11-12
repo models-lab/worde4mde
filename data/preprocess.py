@@ -1,9 +1,12 @@
 import glob
+import json
 import re
 
 import pdftotext
 from nltk.tokenize import word_tokenize, sent_tokenize
 from tqdm import tqdm
+
+from w2v.w2v import MODELS, load_model
 
 
 def read_pdf(file):
@@ -48,4 +51,46 @@ def preprocess_dataset(args):
         content = read_pdf(f)
         tokens = preprocess_doc(content)
         result += tokens
+    return result
+
+
+def load_data_metamodel_concepts(file_name):
+    with open(file_name, "rb") as f:
+        data = json.load(f)
+    return data
+
+
+def inside_vocabs(word, models):
+    for model in models:
+        if word not in model.key_to_index:
+            return False
+    return True
+
+
+def normalize_item(item, models):
+    item_new = {"context": item["context"].lower(), "context_type": item["contextType"]}
+    if not inside_vocabs(item["context"].lower(), models):
+        item_new["context"] = None
+    item_new["recommendations"] = [r.lower()
+                                   for r in item["recommendations"]
+                                   if inside_vocabs(r.lower(), models)]
+    return item_new
+
+
+def preprocess_dataset_metamodel_concepts(args):
+    files = glob.glob(args.training_dataset_concepts + "/**/*.json", recursive=True)
+    result = []
+    for file_name in tqdm(files, desc='Preprocessing files'):
+        data = load_data_metamodel_concepts(file_name)
+        result += data
+
+    models = []
+    for m in MODELS:
+        if m == 'word2vec-mde':
+            w2v_model = load_model(m, args.embeddings_out)
+        else:
+            w2v_model = load_model(m)
+        models.append(w2v_model)
+    result = [normalize_item(item, models) for item in result]
+    result = [item for item in result if item["context"] is not None and item["recommendations"] != []]
     return result
