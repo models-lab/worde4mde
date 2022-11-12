@@ -47,7 +47,7 @@ def filter_categories(labels, ids, thresh=10):
 
 def set_up_modelset(args):
     # load dataset and generate dataframe
-    dataset = load(modeltype='ecore', selected_analysis=['stats'])
+    dataset = load(modeltype=args.model_type, selected_analysis=['stats'])
     modelset_df = dataset.to_normalized_df(min_occurrences_per_category=args.min_occurrences_per_category)
     if args.remove_duplicates:
         ids = list(modelset_df['id'])
@@ -111,7 +111,7 @@ def tokenizer(doc):
         matches = finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', identifier)
         return [m.group(0) for m in matches]
 
-    words = doc.split('\n')
+    words = doc.split()
     words = [w2 for w1 in words for w2 in w1.split('_') if w2 != '']
     words = [w2.lower() for w1 in words for w2 in camel_case_split(w1) if w2 != '']
     return words
@@ -120,7 +120,7 @@ def tokenizer(doc):
 def get_features_w2v(doc, model, dim=300):
     words = [w for w in tokenizer(doc) if w in model.key_to_index]
     if len(words) == 0:
-        logger.info('All zeros in a meta-model')
+        logger.info(f'All zeros in a meta-model')
         return np.zeros(dim)
     vectors = np.stack([model[w] for w in words])
     return np.mean(vectors, axis=0)

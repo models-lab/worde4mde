@@ -56,6 +56,9 @@ if __name__ == '__main__':
     parser.add_argument('--model', default='word2vec-mde',
                         help='Path to the where the embeddings will be saved',
                         choices=MODELS)
+    parser.add_argument('--model_type', default='ecore',
+                        help='ecore or uml',
+                        choices=['ecore', 'uml'])
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--test_similarity', help='Test similarity w2v', action='store_true')
     parser.add_argument('--test_kmeans', help='Test kmeans w2v', action='store_true')
