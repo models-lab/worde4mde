@@ -42,4 +42,5 @@ cd java/parser
 mvn complie
 mvn exec:java
 cd ../..
+python main.py --evaluation_metamodel_concepts
 ```

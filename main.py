@@ -4,6 +4,7 @@ import random
 from argparse import ArgumentParser
 
 import numpy as np
+import torch
 
 from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_concepts
 from modelset_evaluation.evaluation_classification_clustering import evaluation_metamodel_classification, \
@@ -43,6 +44,8 @@ def seed_everything(seed):
     random.seed(seed)
     np.random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
 
 
 def setup_logger():
@@ -88,6 +91,7 @@ if __name__ == '__main__':
     parser.add_argument("--t1", dest="t1", help="t1 threshold.", type=float, default=0.7)
     args = parser.parse_args()
 
+    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
     seed_everything(args.seed)
     setup_logger()
 
