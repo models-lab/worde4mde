@@ -8,3 +8,4 @@ scikit-posthocs==0.7.0
 torch
 torchvision
 torchaudio
+prettytable

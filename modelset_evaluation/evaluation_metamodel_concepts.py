@@ -19,6 +19,7 @@ class RecommenderModel(nn.Module):
         self.in_layer = nn.Embedding.from_pretrained(torch.from_numpy(vectors).float())
         self.in_layer.weight.requires_grad = False
         self.embedding_weights = torch.from_numpy(vectors).float().to(args.device)
+        self.embedding_weights.requires_grad = False
         self.linear_layers_in = nn.Parameter(
             data=torch.zeros(vectors.shape[1], vectors.shape[1]))
         nn.init.uniform_(self.linear_layers_in, -0.05, 0.05)
@@ -66,7 +67,7 @@ def items_to_keys(item, model):
 def evaluation_concepts(args, items):
     # load all models
     models = []
-    for m in MODELS[2:]:
+    for m in MODELS:
         if m == 'word2vec-mde':
             w2v_model = load_model(m, args.embeddings_out)
         else:
@@ -88,7 +89,7 @@ def evaluation_concepts(args, items):
 
         # training phase
         recommender_model.train()
-        for epoch in range(1, 11):
+        for epoch in range(1, 4):
             training_loss = 0.
             for step, batch in enumerate(tqdm(train_data_loader,
                                               desc='[training batch]',

@@ -35,12 +35,11 @@ Meta-model clustering task:
 python main.py --evaluation_metamodel_classification
 ```
 
-
 Meta-model concepts task:
 ```shell
 cd java/parser
 mvn complie
 mvn exec:java
 cd ../..
-python main.py --evaluation_metamodel_concepts
+python main.py --evaluation_metamodel_concepts --device cpu
 ```

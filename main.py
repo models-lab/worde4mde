@@ -1,10 +1,12 @@
 import logging
 import os
 import random
+import sys
 from argparse import ArgumentParser
 
 import numpy as np
 import torch
+from prettytable import PrettyTable
 
 from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_concepts
 from modelset_evaluation.evaluation_classification_clustering import evaluation_metamodel_classification, \
@@ -48,7 +50,8 @@ def seed_everything(seed):
     torch.cuda.manual_seed_all(args.seed)
 
 
-def setup_logger():
+def setup_logger(log_file):
+    # std out
     logger = logging.getLogger()
     logger.setLevel(level=logging.INFO)
     console = logging.StreamHandler()
@@ -56,6 +59,26 @@ def setup_logger():
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s')
     console.setFormatter(formatter)
     logger.addHandler(console)
+
+    # file out
+    if log_file is not None:
+        file = logging.FileHandler(args.log_file)
+        file.setLevel(level=logging.INFO)
+        formatter = logging.Formatter('[%(asctime)s | %(filename)s | line %(lineno)d] - %(levelname)s: %(message)s')
+        file.setFormatter(formatter)
+        logger.addHandler(file)
+
+
+def print_command_and_args():
+    logger = logging.getLogger()
+    logger.info('COMMAND: {}'.format(' '.join(sys.argv)))
+    config_table = PrettyTable()
+    config_table.field_names = ["Configuration", "Value"]
+    config_table.align["Configuration"] = "l"
+    config_table.align["Value"] = "l"
+    for config, value in vars(args).items():
+        config_table.add_row([config, str(value)])
+    logger.info('Configuration:\n{}'.format(config_table))
 
 
 if __name__ == '__main__':
@@ -89,10 +112,15 @@ if __name__ == '__main__':
     parser.add_argument('--min_occurrences_per_category', help='Min occurences per category.', type=int, default=10)
     parser.add_argument("--t0", dest="t0", help="t0 threshold.", type=float, default=0.8)
     parser.add_argument("--t1", dest="t1", help="t1 threshold.", type=float, default=0.7)
+    parser.add_argument('--device', default='cuda',
+                        help='cpu or cuda',
+                        choices=['cpu', 'cuda'])
+    parser.add_argument('--log_file', default='info.log',
+                        help='Log file')
     args = parser.parse_args()
 
-    args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
     seed_everything(args.seed)
-    setup_logger()
+    setup_logger(args.log_file)
+    print_command_and_args()
 
     main(args)
