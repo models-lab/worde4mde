@@ -7,10 +7,7 @@ import org.apache.commons.cli.*;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 
 import java.io.File;
@@ -45,15 +42,13 @@ public class Main {
         String outdir = cmd.getOptionValue("outdir", OUT_DIR_DEFAULT);
 
         // Query database
-        List<String> fileNames = getFileNames(modelSetPath);
+        List<Model> fileNames = getFileNames(modelSetPath);
+        logger.info("Loaded file names from sql database");
         Parser ecoreParser = new ParserEcore();
         int counter = 0;
-        for (String fileName : ProgressBar.wrap(fileNames, "Parsing procedure")) {
-            ResourceSet rs = new ResourceSetImpl();
-            Resource resource = rs.getResource(URI.createFileURI(fileName), true);
-            List<Parser.Item> items = ecoreParser.parse(resource);
+        for (Model model : ProgressBar.wrap(fileNames, "Parsing procedure")) {
+            List<Item> items = ecoreParser.parse(model);
 
-            // logger.debug("Number of items " + items.size());
             File out = Paths.get(outdir, Integer.toString(counter) + ".json").toFile();
             out.getParentFile().mkdirs();
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -78,19 +73,22 @@ public class Main {
         return options;
     }
 
-    private static List<String> getFileNames(String modelSetPath){
-        ArrayList<String> arrayList = new ArrayList<>();
+    private static List<Model> getFileNames(String modelSetPath){
+        ArrayList<Model> arrayList = new ArrayList<>();
         Path filePathDB = Paths.get(modelSetPath, "datasets", "dataset.ecore", "data", "ecore.db");
         Path rawData = Paths.get(modelSetPath, "raw-data", "repo-ecore-all");
         try {
             Connection dataset = DriverManager.getConnection("jdbc:sqlite:" + filePathDB.toString());
-            PreparedStatement stm = dataset.prepareStatement("select mo.filename " +
+            PreparedStatement stm = dataset.prepareStatement("select mo.id, mo.filename " +
                     "from models mo join metadata mm on mo.id = mm.id");
             stm.execute();
             ResultSet rs = stm.getResultSet();
             while (rs.next()) {
-                String filename = rs.getString(1);
-                arrayList.add(Paths.get(rawData.toString(), filename).toString());
+                String id = rs.getString(1);
+                String filename = rs.getString(2);
+                filename = Paths.get(rawData.toString(), filename).toString();
+                Model model = new Model(filename, id);
+                arrayList.add(model);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

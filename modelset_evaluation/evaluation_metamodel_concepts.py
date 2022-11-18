@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from w2v.w2v import load_model, MODELS
 
-KEYS_CONTEXT_TYPE = {"EPackage": 0, "EClass": 1}
+KEYS_CONTEXT_TYPE = {"EPackage": 0, "EClass": 1, "EEnum": 2}
 logger = logging.getLogger()
 
 

@@ -12,7 +12,9 @@ import java.util.List;
 
 public class ParserEcore extends Parser{
     @Override
-    public List<Item> parse(Resource r) {
+    public List<Item> parse(Model model) {
+        Resource r = model.getResource();
+        String id = model.getId();
         List<Item> items = new ArrayList<>();
         TreeIterator<EObject> it = r.getAllContents();
         while (it.hasNext()) {
@@ -30,7 +32,7 @@ public class ParserEcore extends Parser{
                     recommendations.add(classifier.eGet(getFeature(classifier.eClass(),
                             "name")).toString());
                 }
-                Item item = new Item(context, recommendations, "EPackage");
+                Item item = new Item(context, recommendations, "EPackage", id);
                 items.add(item);
             } else if (eClassName.equals("EClass")) {
                 if (obj.eGet(getFeature(eclassContext, "name")) == null)
@@ -43,7 +45,20 @@ public class ParserEcore extends Parser{
                     recommendations.add(eStructuralFeature.eGet(getFeature(eStructuralFeature.eClass(),
                             "name")).toString());
                 }
-                Item item = new Item(context, recommendations, "EClass");
+                Item item = new Item(context, recommendations, "EClass", id);
+                items.add(item);
+            } else if (eClassName.equals("EEnum")) {
+                if (obj.eGet(getFeature(eclassContext, "name")) == null)
+                    continue;
+                String context = obj.eGet(getFeature(eclassContext, "name")).toString();
+                List<String> recommendations = new ArrayList<>();
+                Collection<EObject> elements = (Collection<EObject>) obj.eGet(getFeature(eclassContext,
+                        "eLiterals"));
+                for (EObject literal: elements){
+                    recommendations.add(literal.eGet(getFeature(literal.eClass(),
+                            "name")).toString());
+                }
+                Item item = new Item(context, recommendations, "EEnum", id);
                 items.add(item);
             }
         }

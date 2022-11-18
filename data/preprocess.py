@@ -3,9 +3,11 @@ import json
 import re
 
 import pdftotext
+from modelset import load
 from nltk.tokenize import word_tokenize, sent_tokenize
 from tqdm import tqdm
 
+from modelset_evaluation.evaluation_classification_clustering import get_multiset, tokenizer, get_duplicates
 from w2v.w2v import MODELS, load_model
 
 
@@ -68,7 +70,7 @@ def inside_vocabs(word, models):
 
 
 def normalize_item(item, models):
-    item_new = {"context": item["context"].lower(), "context_type": item["contextType"]}
+    item_new = {"context": item["context"].lower(), "context_type": item["contextType"], "id": item["id"]}
     if not inside_vocabs(item["context"].lower(), models):
         item_new["context"] = None
     item_new["recommendations"] = [r.lower()
@@ -93,4 +95,12 @@ def preprocess_dataset_metamodel_concepts(args):
         models.append(w2v_model)
     result = [normalize_item(item, models) for item in result]
     result = [item for item in result if item["context"] is not None and item["recommendations"] != []]
+    if args.remove_duplicates:
+        dataset = load(modeltype=args.model_type, selected_analysis=['stats'])
+        modelset_df = dataset.to_normalized_df(min_occurrences_per_category=0)
+        ids = list(modelset_df['id'])
+        corpus = [dataset.as_txt(i) for i in ids]
+        corpus_multiset = [get_multiset(tokenizer(doc)) for doc in corpus]
+        representatives = list(get_duplicates(corpus_multiset, ids, args.t0, args.t1).keys())
+        result = [item for item in result if item["id"] in representatives]
     return result

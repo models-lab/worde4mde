@@ -38,7 +38,7 @@ python main.py --evaluation_metamodel_classification
 Meta-model concepts task:
 ```shell
 cd java/parser
-mvn complie
+mvn compile
 mvn exec:java
 cd ../..
 python main.py --evaluation_metamodel_concepts --device cpu
