@@ -13,7 +13,7 @@ from modelset_evaluation.evaluation_classification_clustering import evaluation_
     evaluation_metamodel_clustering
 from modelset_evaluation.evaluation_metamodel_concepts import evaluation_concepts
 from w2v.w2v import training_word2vec, test_similarity_word2vec, \
-    test_kmeans_word2vec, visualize_embeddings, MODELS
+    cluster_word_vectors, visualize_embeddings, MODELS
 
 
 def main(args):
@@ -25,8 +25,8 @@ def main(args):
         training_word2vec(args, tokenized_files)
     if args.test_similarity:
         test_similarity_word2vec(args)
-    if args.test_kmeans:
-        test_kmeans_word2vec(args)
+    if args.cluster_word_vectors:
+        cluster_word_vectors(args)
     if args.visualize_embeddings:
         visualize_embeddings(args)
     if args.evaluation_metamodel_classification:
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     parser.add_argument('--training_dataset_concepts', default='./java/parser/out',
                         help='Path to the concepts modelset dataset')
     parser.add_argument('--embeddings_out', default='./out',
-                        help='Path to the where the embeddings will be saved')
+                        help='Path to the where the embeddings are/will be saved')
     parser.add_argument('--seed', help='seed.', type=int, default=123)
     parser.add_argument('--folds', help='folds.', type=int, default=10)
     parser.add_argument('--model', default='word2vec-mde',
@@ -99,7 +99,9 @@ if __name__ == '__main__':
                         choices=['ecore', 'uml'])
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--test_similarity', help='Test similarity w2v', action='store_true')
-    parser.add_argument('--test_kmeans', help='Test kmeans w2v', action='store_true')
+    parser.add_argument('--cluster_word_vectors', help='Cluster word vectors', action='store_true')
+    parser.add_argument('--cluster_word_vectors_technique', help='Cluster word vectors', default='kmeans',
+                        choices=['kmeans', 'dbscan'])
     parser.add_argument('--visualize_embeddings', help='Tsne', action='store_true')
     parser.add_argument('--evaluation_metamodel_classification', help='Evaluate embeddings in metamodel classification',
                         action='store_true')

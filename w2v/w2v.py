@@ -3,8 +3,9 @@ import os
 
 import gensim.downloader as api
 import matplotlib.pyplot as plt
+import numpy as np
 from gensim.models import Word2Vec, KeyedVectors
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN
 from sklearn.manifold import TSNE
 from yellowbrick.cluster import KElbowVisualizer
 
@@ -47,16 +48,19 @@ def test_similarity_word2vec(args):
         logger.info(f'Most similar {word}: {reloaded_word_vectors.most_similar(positive=[word])}')
 
 
-def test_kmeans_word2vec(args):
+def cluster_word_vectors(args):
     reloaded_word_vectors = load_model(args.model, args.embeddings_out)
-
-    model = KMeans(random_state=args.seed, verbose=True)
-    visualizer = KElbowVisualizer(model,
-                                  metric='distortion',
-                                  k=list(range(10, 110, 10)),
-                                  timings=False)
-    visualizer.fit(reloaded_word_vectors.vectors)
-    visualizer.show(outpath=DEFAULT_FIG_NAME, clear_figure=True)
+    if args.cluster_word_vectors_technique == 'kmeans':
+        clustering = KMeans(random_state=args.seed, verbose=False, n_clusters=100).fit(reloaded_word_vectors.vectors)
+    elif args.cluster_word_vectors_technique == 'dbscan':
+        clustering = DBSCAN(eps=0.3, min_samples=10, metric='cosine').fit(reloaded_word_vectors.vectors)
+    logger.info(f'Clusters: {np.unique(clustering.labels_)}')
+    for cluster in np.unique(clustering.labels_):
+        if cluster != -1:
+            indices = np.argwhere(clustering.labels_ == cluster).flatten()[0:10]
+            logger.info(f'------------- Cluster {cluster} -------------')
+            for i in indices:
+                logger.info(f'{reloaded_word_vectors.index_to_key[i]}')
 
 
 def visualize_embeddings(args):
