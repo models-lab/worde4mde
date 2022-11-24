@@ -209,13 +209,18 @@ def evaluation_metamodel_clustering(args):
             w2v_model = load_model(m)
         X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
 
-    results = {}
+    results = defaultdict(list)
     for m in tqdm(MODELS, desc='Iteration over word embeddings'):
-        model = KMeans(random_state=args.seed, verbose=False, n_clusters=len(np.unique(labels)))
-        model.fit(X_models[m])
-        y_pred = model.labels_
-        results[m] = v_measure_score(labels_true=np.array(labels), labels_pred=y_pred)
+        for i in range(1, 11):
+            model = KMeans(random_state=args.seed + i, verbose=False, n_clusters=len(np.unique(labels)))
+            model.fit(X_models[m])
+            y_pred = model.labels_
+            results[m].append(v_measure_score(labels_true=np.array(labels), labels_pred=y_pred))
 
     logger.info('------Results------')
     for m in MODELS:
-        logger.info(f'V-measure for {m}: {results[m]}')
+        logger.info(f'V-measure for {m}: {np.mean(results[m])}')
+    logger.info('------Tests------')
+    logger.info(stats.friedmanchisquare(*[results[m] for m in MODELS]))
+    p_adjust = 'bonferroni'
+    logger.info(f'\n{posthoc_wilcoxon([results[m] for m in MODELS], p_adjust=p_adjust)}')

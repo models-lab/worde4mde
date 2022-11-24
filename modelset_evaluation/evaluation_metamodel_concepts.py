@@ -74,7 +74,7 @@ def evaluation_concepts(args, items):
             w2v_model = load_model(m)
         models.append(w2v_model)
 
-    for w2v_model in models:
+    for model_name_id, w2v_model in enumerate(models):
         keyed_items = [items_to_keys(item, w2v_model) for item in items]
 
         train, test = train_test_split(keyed_items, test_size=0.3)
@@ -107,6 +107,9 @@ def evaluation_concepts(args, items):
                 training_loss += loss.item()
             training_loss = training_loss / len(train_data_loader)
             logger.info(f'[epoch {epoch}] train loss: {round(training_loss, 4)}')
+
+        logger.info(f'Saving model checkpoint {MODELS[model_name_id]}')
+        torch.save(recommender_model.state_dict(), f'{MODELS[model_name_id]}.bin')
 
         # evaluation phase
         recommender_model.eval()
