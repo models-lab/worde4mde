@@ -63,3 +63,10 @@ mvn exec:java
 cd ../..
 python main.py --evaluation_metamodel_concepts --device cpu
 ```
+
+Example of recommendations:
+```shell
+python main.py --example_recommendation --model word2vec-mde
+python main.py --example_recommendation --model glove-wiki-gigaword-300
+python main.py --example_recommendation --model word2vec-google-news-300
+```

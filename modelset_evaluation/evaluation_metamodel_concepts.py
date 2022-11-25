@@ -132,3 +132,26 @@ def evaluation_concepts(args, items):
                 intersection = [v for v in pred if v in true]
                 recalls.append(float(len(intersection)) / len(true))
         logger.info(f'[Evaluation] recall: {round(np.mean(recalls), 4)}')
+
+
+def example_recommendation(args):
+    classes = ['statechart', 'graph',
+               'social', 'petri', 'maven',
+               'expression', 'binaryexpression',
+               'eclass', 'feature']
+
+    w2v_model = load_model(args.model, args.embeddings_out)
+    recommender_model = RecommenderModel(np.array(w2v_model.vectors), args).to(args.device)
+    recommender_model.load_state_dict(torch.load(f'{args.model}.bin'))
+    recommender_model.eval()
+
+    for c in classes:
+        if c not in w2v_model.key_to_index:
+            logger.info(f'{c} not in the vocab of {args.model}')
+            continue
+        context = torch.tensor([w2v_model.key_to_index[c]])
+        output_lsfm = recommender_model(context.to(args.device))
+        top10 = torch.topk(output_lsfm, k=10, dim=1).indices.cpu().detach().tolist()[0]
+        logger.info(f'-------Recommendations for {c}-------')
+        for r in top10:
+            logger.info(f'{w2v_model.index_to_key[r]}')

@@ -44,7 +44,8 @@ def test_similarity_word2vec(args):
     for word in ['state', 'sql', 'transition',
                  'assignment', 'petri',
                  'father', 'name', 'epsilon',
-                 'graph', 'classroom', 'transformation']:
+                 'graph', 'classroom', 'transformation',
+                 'statechart']:
         logger.info(f'Most similar {word}: {reloaded_word_vectors.most_similar(positive=[word])}')
 
 
