@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 
 import numpy as np
 import torch
@@ -118,7 +119,7 @@ def evaluation_concepts(args, items):
                                       shuffle=False,
                                       collate_fn=collate_fn,
                                       num_workers=0)
-        recalls = []
+        recalls = defaultdict(list)
         for step, batch in enumerate(tqdm(test_data_loader,
                                           desc='[testing batch]',
                                           bar_format='{desc:<10}{percentage:3.0f}%|{bar:100}{r_bar}')):
@@ -128,10 +129,12 @@ def evaluation_concepts(args, items):
             top10 = torch.topk(output_lsfm, k=10, dim=1).indices.cpu().detach().tolist()
             recommendations_indices = recommendations_indices.tolist()
             recommendations_indices = [[r1 for r1 in r if r1 != -1] for r in recommendations_indices]
-            for pred, true in zip(top10, recommendations_indices):
-                intersection = [v for v in pred if v in true]
-                recalls.append(float(len(intersection)) / len(true))
-        logger.info(f'[Evaluation] recall: {round(np.mean(recalls), 4)}')
+            for thr in [3, 5, 10]:
+                for pred, true in zip(top10, recommendations_indices):
+                    intersection = [v for v in pred[0:thr] if v in true]
+                    recalls[thr].append(float(len(intersection)) / len(true))
+        for thr in [3, 5, 10]:
+            logger.info(f'[Evaluation] recall@{thr}: {round(np.mean(recalls[thr]), 4)}')
 
 
 def example_recommendation(args):

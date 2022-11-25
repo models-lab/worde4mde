@@ -10,7 +10,7 @@ from prettytable import PrettyTable
 
 from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_concepts
 from modelset_evaluation.evaluation_classification_clustering import evaluation_metamodel_classification, \
-    evaluation_metamodel_clustering
+    evaluation_metamodel_clustering, compute_intersecion_vocabs
 from modelset_evaluation.evaluation_metamodel_concepts import evaluation_concepts, example_recommendation
 from w2v.w2v import training_word2vec, test_similarity_word2vec, \
     cluster_word_vectors, visualize_embeddings, MODELS
@@ -42,6 +42,8 @@ def main(args):
         evaluation_concepts(args, items)
     if args.example_recommendation:
         example_recommendation(args)
+    if args.compute_coverage:
+        compute_intersecion_vocabs(args)
 
 
 def seed_everything(seed):
@@ -113,6 +115,8 @@ if __name__ == '__main__':
                                                                 'recommendation',
                         action='store_true')
     parser.add_argument('--example_recommendation', help='Example recommendation',
+                        action='store_true')
+    parser.add_argument('--compute_coverage', help='Intersection of vocabs',
                         action='store_true')
     parser.add_argument('--remove_duplicates', help='Remove duplicate models', action='store_true')
     parser.add_argument('--min_occurrences_per_category', help='Min occurences per category.', type=int, default=10)
