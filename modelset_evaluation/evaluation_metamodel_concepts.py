@@ -4,6 +4,8 @@ from collections import defaultdict
 import numpy as np
 import torch
 import torch.nn as nn
+from scikit_posthocs import posthoc_wilcoxon
+from scipy import stats
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -65,6 +67,9 @@ def items_to_keys(item, model):
     return item_new
 
 
+THRESH = [3, 5, 10]
+
+
 def evaluation_concepts(args, items):
     # load all models
     models = []
@@ -75,10 +80,11 @@ def evaluation_concepts(args, items):
             w2v_model = load_model(m)
         models.append(w2v_model)
 
+    results_recalls = {}
     for model_name_id, w2v_model in enumerate(models):
         keyed_items = [items_to_keys(item, w2v_model) for item in items]
 
-        train, test = train_test_split(keyed_items, test_size=0.3)
+        train, test = train_test_split(keyed_items, test_size=0.3, random_state=args.seed)
         train_data_loader = DataLoader(dataset=train,
                                        batch_size=32,
                                        shuffle=True,
@@ -129,12 +135,20 @@ def evaluation_concepts(args, items):
             top10 = torch.topk(output_lsfm, k=10, dim=1).indices.cpu().detach().tolist()
             recommendations_indices = recommendations_indices.tolist()
             recommendations_indices = [[r1 for r1 in r if r1 != -1] for r in recommendations_indices]
-            for thr in [3, 5, 10]:
+            for thr in THRESH:
                 for pred, true in zip(top10, recommendations_indices):
                     intersection = [v for v in pred[0:thr] if v in true]
                     recalls[thr].append(float(len(intersection)) / len(true))
-        for thr in [3, 5, 10]:
+        for thr in THRESH:
             logger.info(f'[Evaluation] recall@{thr}: {round(np.mean(recalls[thr]), 4)}')
+        results_recalls[MODELS[model_name_id]] = recalls
+
+    logger.info('------Tests------')
+    for thr in THRESH:
+        logger.info(f'Recall@{thr}')
+        logger.info(stats.friedmanchisquare(*[results_recalls[m][thr] for m in MODELS]))
+        p_adjust = 'bonferroni'
+        logger.info(f'\n{posthoc_wilcoxon([results_recalls[m][thr] for m in MODELS], p_adjust=p_adjust)}')
 
 
 def example_recommendation(args):
