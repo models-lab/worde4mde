@@ -1,10 +1,31 @@
 # Word2vec4MDE
 
-## Requirements 🛠
+## Installation 🛠
 
-This repo is written in Python. 
-Thus, you need Python 3.8.X and install the requirements listed in this `requirements.txt`. 
-I recommend you first generate a virtual environment and then install the requirements.
+### With conda (recommended)
+
+This repo is written in Python and Java. Thus, I recommend to use conda. To initialize the conda environment,
+just execute:
+```shell
+sudo apt install build-essential libpoppler-cpp-dev pkg-config python3-dev
+conda env create --file=conda_venv.yml
+conda activate word2vec-mde
+python -m nltk.downloader all
+```
+
+After that, you need to download ModelSet dataset as all the experiments were run over this dataset.
+```shell
+python -m modelset.downloader
+```
+
+### Without conda
+
+You need to install:
+- Python 3.8.X
+- Openjdk 1.8
+- Maven 3.8.6
+
+Generate a virtual environment and then install the requirements.
 
 ```shell
 sudo apt install build-essential libpoppler-cpp-dev pkg-config python3-dev
@@ -14,7 +35,7 @@ pip install -r requirements.txt
 python -m nltk.downloader all
 ```
 
-After that, you need to download ModelSet dataset as all the experiments were run over this dataset.
+After that, you need to download ModelSet dataset.
 ```shell
 python -m modelset.downloader
 ```
