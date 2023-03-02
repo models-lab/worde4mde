@@ -59,7 +59,7 @@ def setup_logger(log_file):
 
     # file out
     if log_file is not None:
-        file = logging.FileHandler(args.log_file)
+        file = logging.FileHandler(log_file)
         file.setLevel(level=logging.INFO)
         formatter = logging.Formatter('[%(asctime)s | %(filename)s | line %(lineno)d] - %(levelname)s: %(message)s')
         file.setFormatter(formatter)
