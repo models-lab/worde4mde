@@ -56,12 +56,9 @@ python main.py --train
 
 Word similarity:
 ```shell
-python main.py --test_similarity --model word2vec-mde 
-```
-
-Clustering:
-```shell
-python main.py --cluster_word_vectors
+python main.py --test_similarity --model word2vec-mde
+python main.py --test_similarity --model glove-wiki-gigaword-300
+python main.py --test_similarity --model word2vec-google-news-300
 ```
 
 ## Using the embeddings for meta-model classification, clustering and recommendation 📋
@@ -69,11 +66,13 @@ python main.py --cluster_word_vectors
 Meta-model classification task:
 ```shell
 python main.py --evaluation_metamodel_classification
+python main.py --evaluation_metamodel_classification --remove_duplicates
 ```
 
 Meta-model clustering task:
 ```shell
 python main.py --evaluation_metamodel_clustering
+python main.py --evaluation_metamodel_clustering --remove_duplicates
 ```
 
 Meta-model concepts task:
@@ -83,6 +82,7 @@ mvn compile
 mvn exec:java
 cd ../..
 python main.py --evaluation_metamodel_concepts --device cpu
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu
 ```
 
 Example of recommendations:

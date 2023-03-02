@@ -10,10 +10,9 @@ from prettytable import PrettyTable
 
 from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_concepts
 from modelset_evaluation.evaluation_classification_clustering import evaluation_metamodel_classification, \
-    evaluation_metamodel_clustering, compute_intersecion_vocabs
+    evaluation_metamodel_clustering
 from modelset_evaluation.evaluation_metamodel_concepts import evaluation_concepts, example_recommendation
-from w2v.w2v import training_word2vec, test_similarity_word2vec, \
-    cluster_word_vectors, visualize_embeddings, MODELS
+from w2v.w2v import training_word2vec, test_similarity_word2vec, MODELS
 
 
 def main(args):
@@ -25,10 +24,6 @@ def main(args):
         training_word2vec(args, tokenized_files)
     if args.test_similarity:
         test_similarity_word2vec(args)
-    if args.cluster_word_vectors:
-        cluster_word_vectors(args)
-    if args.visualize_embeddings:
-        visualize_embeddings(args)
     if args.evaluation_metamodel_classification:
         evaluation_metamodel_classification(args)
     if args.evaluation_metamodel_clustering:
@@ -42,8 +37,6 @@ def main(args):
         evaluation_concepts(args, items)
     if args.example_recommendation:
         example_recommendation(args)
-    if args.compute_coverage:
-        compute_intersecion_vocabs(args)
 
 
 def seed_everything(seed):
@@ -96,17 +89,13 @@ if __name__ == '__main__':
     parser.add_argument('--seed', help='seed.', type=int, default=123)
     parser.add_argument('--folds', help='folds.', type=int, default=10)
     parser.add_argument('--model', default='word2vec-mde',
-                        help='Path to the where the embeddings will be saved',
+                        help='w2v model',
                         choices=MODELS)
     parser.add_argument('--model_type', default='ecore',
                         help='ecore or uml',
                         choices=['ecore', 'uml'])
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--test_similarity', help='Test similarity w2v', action='store_true')
-    parser.add_argument('--cluster_word_vectors', help='Cluster word vectors', action='store_true')
-    parser.add_argument('--cluster_word_vectors_technique', help='Cluster word vectors', default='kmeans',
-                        choices=['kmeans', 'dbscan'])
-    parser.add_argument('--visualize_embeddings', help='Tsne', action='store_true')
     parser.add_argument('--evaluation_metamodel_classification', help='Evaluate embeddings in metamodel classification',
                         action='store_true')
     parser.add_argument('--evaluation_metamodel_clustering', help='Evaluate embeddings in metamodel clustering',
@@ -115,8 +104,6 @@ if __name__ == '__main__':
                                                                 'recommendation',
                         action='store_true')
     parser.add_argument('--example_recommendation', help='Example recommendation',
-                        action='store_true')
-    parser.add_argument('--compute_coverage', help='Intersection of vocabs',
                         action='store_true')
     parser.add_argument('--remove_duplicates', help='Remove duplicate models', action='store_true')
     parser.add_argument('--min_occurrences_per_category', help='Min occurences per category.', type=int, default=10)
