@@ -31,6 +31,7 @@ def main(args):
     if args.evaluation_metamodel_concepts:
         items = preprocess_dataset_metamodel_concepts(args)
         logger.info(f'Finish preprocessing, number of items: {len(items)}')
+        logger.info(f'Context type: {args.context_type}')
         avg = np.mean([len(item['recommendations']) for item in items])
         std = np.std([len(item['recommendations']) for item in items])
         logger.info(f'Avg recommendations: {avg}+-{std}')
@@ -103,6 +104,8 @@ if __name__ == '__main__':
     parser.add_argument('--evaluation_metamodel_concepts', help='Evaluate embeddings in metamodel concept '
                                                                 'recommendation',
                         action='store_true')
+    parser.add_argument('--context_type', help='Recommendation of structural features, classifiers, or literals',
+                        default='EClass', choices=['EClass', 'EPackage', 'EEnum'])
     parser.add_argument('--example_recommendation', help='Example recommendation',
                         action='store_true')
     parser.add_argument('--remove_duplicates', help='Remove duplicate models', action='store_true')

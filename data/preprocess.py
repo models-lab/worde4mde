@@ -95,6 +95,7 @@ def preprocess_dataset_metamodel_concepts(args):
         models.append(w2v_model)
     result = [normalize_item(item, models) for item in result]
     result = [item for item in result if item["context"] is not None and item["recommendations"] != []]
+    result = [item for item in result if item["context_type"] == args.context_type]
     if args.remove_duplicates:
         dataset = load(modeltype=args.model_type, selected_analysis=['stats'])
         modelset_df = dataset.to_normalized_df(min_occurrences_per_category=0)

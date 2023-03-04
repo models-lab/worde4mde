@@ -1,4 +1,5 @@
 import logging
+import sys
 from collections import defaultdict
 
 import numpy as np
@@ -116,7 +117,7 @@ def evaluation_concepts(args, items):
             logger.info(f'[epoch {epoch}] train loss: {round(training_loss, 4)}')
 
         logger.info(f'Saving model checkpoint {MODELS[model_name_id]}')
-        torch.save(recommender_model.state_dict(), f'{MODELS[model_name_id]}.bin')
+        torch.save(recommender_model.state_dict(), f'{MODELS[model_name_id]}_{args.context_type}.bin')
 
         # evaluation phase
         recommender_model.eval()
@@ -152,23 +153,23 @@ def evaluation_concepts(args, items):
 
 
 def example_recommendation(args):
-    classes = ['statechart', 'graph',
-               'social', 'petri', 'maven',
-               'expression', 'binaryexpression',
-               'eclass', 'feature']
-
     w2v_model = load_model(args.model, args.embeddings_out)
     recommender_model = RecommenderModel(np.array(w2v_model.vectors), args).to(args.device)
-    recommender_model.load_state_dict(torch.load(f'{args.model}.bin'))
+    recommender_model.load_state_dict(torch.load(f'{args.model}_{args.context_type}.bin'))
     recommender_model.eval()
 
-    for c in classes:
-        if c not in w2v_model.key_to_index:
-            logger.info(f'{c} not in the vocab of {args.model}')
+    logger.info(f'Introduce as input your {args.context_type} name')
+    logger.info(f'To exit press ctrl + d')
+    for line in sys.stdin:
+        word = line.rstrip()
+        if word not in w2v_model.key_to_index:
+            logger.info(f'Word {word} not in vocab')
+            logger.info(f'Introduce as input your {args.context_type}')
             continue
-        context = torch.tensor([w2v_model.key_to_index[c]])
+        context = torch.tensor([w2v_model.key_to_index[word]])
         output_lsfm = recommender_model(context.to(args.device))
         top10 = torch.topk(output_lsfm, k=10, dim=1).indices.cpu().detach().tolist()[0]
-        logger.info(f'-------Recommendations for {c}-------')
+        logger.info(f'-------Recommendations for {word}-------')
         for r in top10:
             logger.info(f'{w2v_model.index_to_key[r]}')
+        logger.info(f'Introduce as input your {args.context_type}')

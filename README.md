@@ -81,13 +81,23 @@ cd java/parser
 mvn compile
 mvn exec:java
 cd ../..
-python main.py --evaluation_metamodel_concepts --device cpu
-python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu
+python main.py --evaluation_metamodel_concepts --device cpu --context_type EClass
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EClass
+python main.py --evaluation_metamodel_concepts --device cpu --context_type EPackage
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EPackage
+python main.py --evaluation_metamodel_concepts --device cpu --context_type EEnum
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EEnum
 ```
 
 Example of recommendations:
 ```shell
-python main.py --example_recommendation --model word2vec-mde
-python main.py --example_recommendation --model glove-wiki-gigaword-300
-python main.py --example_recommendation --model word2vec-google-news-300
+python main.py --example_recommendation --model word2vec-mde --context_type EClass
+python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type EClass
+python main.py --example_recommendation --model word2vec-google-news-300 --context_type EClass
+python main.py --example_recommendation --model word2vec-mde --context_type EPackage
+python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type EPackage
+python main.py --example_recommendation --model word2vec-google-news-300 --context_type EPackage
+python main.py --example_recommendation --model word2vec-mde --context_type EEnum
+python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type EEnum
+python main.py --example_recommendation --model word2vec-google-news-300 --context_type EEnum
 ```
