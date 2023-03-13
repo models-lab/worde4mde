@@ -7,7 +7,8 @@ from modelset import load
 from nltk.tokenize import word_tokenize, sent_tokenize
 from tqdm import tqdm
 
-from modelset_evaluation.evaluation_classification_clustering import get_multiset, tokenizer, get_duplicates
+from modelset_evaluation.evaluation_classification_clustering import get_multiset, tokenizer, get_duplicates, \
+    set_up_modelset
 from w2v.w2v import MODELS, load_model
 
 
@@ -96,12 +97,6 @@ def preprocess_dataset_metamodel_concepts(args):
     result = [normalize_item(item, models) for item in result]
     result = [item for item in result if item["context"] is not None and item["recommendations"] != []]
     result = [item for item in result if item["context_type"] == args.context_type]
-    if args.remove_duplicates:
-        dataset = load(modeltype=args.model_type, selected_analysis=['stats'])
-        modelset_df = dataset.to_normalized_df(min_occurrences_per_category=0)
-        ids = list(modelset_df['id'])
-        corpus = [dataset.as_txt(i) for i in ids]
-        corpus_multiset = [get_multiset(tokenizer(doc)) for doc in corpus]
-        representatives = list(get_duplicates(corpus_multiset, ids, args.t0, args.t1).keys())
-        result = [item for item in result if item["id"] in representatives]
+    modelset_df, _ = set_up_modelset(args)
+    result = [item for item in result if item["id"] in list(modelset_df['id'])]
     return result
