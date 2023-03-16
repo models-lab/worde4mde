@@ -25,10 +25,10 @@ class RecommenderModel(nn.Module):
         self.embedding_weights = torch.from_numpy(vectors).float().to(args.device)
         self.embedding_weights.requires_grad = False
         self.linear_layers_in = nn.Parameter(
-            data=torch.zeros(vectors.shape[1], vectors.shape[1]))
+            data=torch.zeros(vectors.shape[1], 128))  # vectors.shape[1]
         nn.init.uniform_(self.linear_layers_in, -0.05, 0.05)
         self.linear_layers_out = nn.Parameter(
-            data=torch.zeros(vectors.shape[1], vectors.shape[1]))
+            data=torch.zeros(vectors.shape[1], 128))  # vectors.shape[1]
         nn.init.uniform_(self.linear_layers_out, -0.05, 0.05)
         self.sfm = nn.Softmax(dim=1)
 
@@ -75,10 +75,7 @@ def evaluation_concepts(args, items):
     # load all models
     models = []
     for m in MODELS:
-        if m == 'word2vec-mde':
-            w2v_model = load_model(m, args.embeddings_out)
-        else:
-            w2v_model = load_model(m)
+        w2v_model = load_model(m, args.embeddings_out)
         models.append(w2v_model)
 
     results_recalls = {}
@@ -92,12 +89,12 @@ def evaluation_concepts(args, items):
                                        collate_fn=collate_fn,
                                        num_workers=0)
         recommender_model = RecommenderModel(np.array(w2v_model.vectors), args).to(args.device)
-        optimizer = torch.optim.Adam(recommender_model.parameters(), lr=0.001)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, recommender_model.parameters()), lr=0.001)
         criterion = nn.BCELoss(reduction='none')
 
         # training phase
         recommender_model.train()
-        for epoch in range(1, 4):
+        for epoch in range(1, 6):
             training_loss = 0.
             for step, batch in enumerate(tqdm(train_data_loader,
                                               desc='[training batch]',
@@ -110,6 +107,9 @@ def evaluation_concepts(args, items):
                 loss = loss.sum(dim=1)
                 loss = loss.mean(dim=0)
                 loss.backward()
+
+                nn.utils.clip_grad_value_(filter(lambda p: p.requires_grad, recommender_model.parameters()),
+                                          clip_value=1.0)
                 optimizer.step()
                 optimizer.zero_grad()
                 training_loss += loss.item()

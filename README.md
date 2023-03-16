@@ -49,7 +49,8 @@ TODO
 
 Run the training procedure (by default all pdfs have to be placed in a folder called `docs`):
 ```shell
-python main.py --train
+python main.py --train --w2v_algorithm skip_gram
+python main.py --train --w2v_algorithm cbow
 ```
 
 ## Exploring embeddings 📋
