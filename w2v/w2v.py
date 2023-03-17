@@ -15,7 +15,6 @@ CBOW_VECTORS = 'cbow_vectors.kv'
 MODELS = [
     'glove-wiki-gigaword-300',
     'skip_gram-mde',
-    'cbow-mde',
     'glove-mde',
     'word2vec-google-news-300']
 PATHS = {
@@ -63,11 +62,8 @@ def load_model(model, embeddings_out=None):
 
 def test_similarity_word2vec(args):
     reloaded_word_vectors = load_model(args.model, args.embeddings_out)
-    for word in ['state', 'sql', 'transition',
-                 'assignment', 'petri',
-                 'father', 'name', 'epsilon',
-                 'graph', 'classroom', 'transformation',
-                 'statechart']:
+    for word in ['state', 'atl', 'dsl', 'grammar',
+                 'petri', 'statechart']:
         if word in reloaded_word_vectors.key_to_index:
             logger.info(f'Most similar {word}: {reloaded_word_vectors.most_similar(positive=[word])}')
         else:

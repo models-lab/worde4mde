@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from collections import defaultdict
 
@@ -26,10 +27,12 @@ class RecommenderModel(nn.Module):
         self.embedding_weights.requires_grad = False
         self.linear_layers_in = nn.Parameter(
             data=torch.zeros(vectors.shape[1], 128))  # vectors.shape[1]
-        nn.init.uniform_(self.linear_layers_in, -0.05, 0.05)
+        # nn.init.uniform_(self.linear_layers_in, -0.05, 0.05)
+        nn.init.xavier_normal_(self.linear_layers_in)
         self.linear_layers_out = nn.Parameter(
             data=torch.zeros(vectors.shape[1], 128))  # vectors.shape[1]
-        nn.init.uniform_(self.linear_layers_out, -0.05, 0.05)
+        # nn.init.uniform_(self.linear_layers_out, -0.05, 0.05)
+        nn.init.xavier_normal_(self.linear_layers_out)
         self.sfm = nn.Softmax(dim=1)
 
     def forward(self, context):
@@ -108,8 +111,8 @@ def evaluation_concepts(args, items):
                 loss = loss.mean(dim=0)
                 loss.backward()
 
-                nn.utils.clip_grad_value_(filter(lambda p: p.requires_grad, recommender_model.parameters()),
-                                          clip_value=1.0)
+                nn.utils.clip_grad_norm_(filter(lambda p: p.requires_grad, recommender_model.parameters()),
+                                         max_norm=1)
                 optimizer.step()
                 optimizer.zero_grad()
                 training_loss += loss.item()
@@ -117,7 +120,9 @@ def evaluation_concepts(args, items):
             logger.info(f'[epoch {epoch}] train loss: {round(training_loss, 4)}')
 
         logger.info(f'Saving model checkpoint {MODELS[model_name_id]}')
-        torch.save(recommender_model.state_dict(), f'{MODELS[model_name_id]}_{args.context_type}.bin')
+
+        os.makedirs("./models", exist_ok=True)
+        torch.save(recommender_model.state_dict(), f'models/{MODELS[model_name_id]}_{args.context_type}.bin')
 
         # evaluation phase
         recommender_model.eval()

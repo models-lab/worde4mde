@@ -49,15 +49,15 @@ TODO
 
 Run the training procedure (by default all pdfs have to be placed in a folder called `docs`):
 ```shell
-python main.py --train --w2v_algorithm skip_gram
-python main.py --train --w2v_algorithm cbow
+python main.py --train --w2v_algorithm skip_gram --training_dataset docs/modelling --folder_out_embeddings skip_gram_modelling
 ```
 
 ## Exploring embeddings 📋
 
 Word similarity:
 ```shell
-python main.py --test_similarity --model word2vec-mde
+python main.py --test_similarity --model glove-mde
+python main.py --test_similarity --model skip_gram-mde
 python main.py --test_similarity --model glove-wiki-gigaword-300
 python main.py --test_similarity --model word2vec-google-news-300
 ```
