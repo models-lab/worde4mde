@@ -168,3 +168,5 @@ out
 /glove-wiki-gigaword-300.bin
 /word2vec-mde.bin
 /word2vec-google-news-300.bin
+/stopwords.txt
+/wordcloud.png
