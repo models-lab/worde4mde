@@ -92,13 +92,8 @@ python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu 
 
 Example of recommendations:
 ```shell
-python main.py --example_recommendation --model word2vec-mde --context_type EClass
-python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type EClass
-python main.py --example_recommendation --model word2vec-google-news-300 --context_type EClass
-python main.py --example_recommendation --model word2vec-mde --context_type EPackage
-python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type EPackage
-python main.py --example_recommendation --model word2vec-google-news-300 --context_type EPackage
-python main.py --example_recommendation --model word2vec-mde --context_type EEnum
-python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type EEnum
-python main.py --example_recommendation --model word2vec-google-news-300 --context_type EEnum
+python main.py --example_recommendation --model glove-mde --context_type {EClass, EPackage, EEnum}
+python main.py --example_recommendation --model skip_gram-mde --context_type {EClass, EPackage, EEnum}
+python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type {EClass, EPackage, EEnum}
+python main.py --example_recommendation --model word2vec-google-news-300 --context_type {EClass, EPackage, EEnum}
 ```

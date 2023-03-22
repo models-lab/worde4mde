@@ -122,7 +122,9 @@ def evaluation_concepts(args, items):
         logger.info(f'Saving model checkpoint {MODELS[model_name_id]}')
 
         os.makedirs("./models", exist_ok=True)
-        torch.save(recommender_model.state_dict(), f'models/{MODELS[model_name_id]}_{args.context_type}.bin')
+        duplication = 'not_duplicated' if args.remove_duplicates else 'duplicated'
+        torch.save(recommender_model.state_dict(),
+                   f'models/{MODELS[model_name_id]}_{args.context_type}_{duplication}.bin')
 
         # evaluation phase
         recommender_model.eval()
@@ -160,7 +162,8 @@ def evaluation_concepts(args, items):
 def example_recommendation(args):
     w2v_model = load_model(args.model, args.embeddings_out)
     recommender_model = RecommenderModel(np.array(w2v_model.vectors), args).to(args.device)
-    recommender_model.load_state_dict(torch.load(f'{args.model}_{args.context_type}.bin'))
+    duplication = 'not_duplicated' if args.remove_duplicates else 'duplicated'
+    recommender_model.load_state_dict(torch.load(f'models/{args.model}_{args.context_type}_{duplication}.bin'))
     recommender_model.eval()
 
     logger.info(f'Introduce as input your {args.context_type} name')
