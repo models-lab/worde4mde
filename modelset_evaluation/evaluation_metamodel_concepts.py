@@ -1,4 +1,6 @@
 import logging
+import os
+import sys
 from collections import defaultdict
 
 import numpy as np
@@ -24,11 +26,13 @@ class RecommenderModel(nn.Module):
         self.embedding_weights = torch.from_numpy(vectors).float().to(args.device)
         self.embedding_weights.requires_grad = False
         self.linear_layers_in = nn.Parameter(
-            data=torch.zeros(vectors.shape[1], vectors.shape[1]))
-        nn.init.uniform_(self.linear_layers_in, -0.05, 0.05)
+            data=torch.zeros(vectors.shape[1], 128))  # vectors.shape[1]
+        # nn.init.uniform_(self.linear_layers_in, -0.05, 0.05)
+        nn.init.xavier_normal_(self.linear_layers_in)
         self.linear_layers_out = nn.Parameter(
-            data=torch.zeros(vectors.shape[1], vectors.shape[1]))
-        nn.init.uniform_(self.linear_layers_out, -0.05, 0.05)
+            data=torch.zeros(vectors.shape[1], 128))  # vectors.shape[1]
+        # nn.init.uniform_(self.linear_layers_out, -0.05, 0.05)
+        nn.init.xavier_normal_(self.linear_layers_out)
         self.sfm = nn.Softmax(dim=1)
 
     def forward(self, context):
@@ -74,10 +78,7 @@ def evaluation_concepts(args, items):
     # load all models
     models = []
     for m in MODELS:
-        if m == 'word2vec-mde':
-            w2v_model = load_model(m, args.embeddings_out)
-        else:
-            w2v_model = load_model(m)
+        w2v_model = load_model(m, args.embeddings_out)
         models.append(w2v_model)
 
     results_recalls = {}
@@ -91,12 +92,12 @@ def evaluation_concepts(args, items):
                                        collate_fn=collate_fn,
                                        num_workers=0)
         recommender_model = RecommenderModel(np.array(w2v_model.vectors), args).to(args.device)
-        optimizer = torch.optim.Adam(recommender_model.parameters(), lr=0.001)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, recommender_model.parameters()), lr=0.001)
         criterion = nn.BCELoss(reduction='none')
 
         # training phase
         recommender_model.train()
-        for epoch in range(1, 4):
+        for epoch in range(1, 6):
             training_loss = 0.
             for step, batch in enumerate(tqdm(train_data_loader,
                                               desc='[training batch]',
@@ -109,6 +110,9 @@ def evaluation_concepts(args, items):
                 loss = loss.sum(dim=1)
                 loss = loss.mean(dim=0)
                 loss.backward()
+
+                nn.utils.clip_grad_norm_(filter(lambda p: p.requires_grad, recommender_model.parameters()),
+                                         max_norm=1)
                 optimizer.step()
                 optimizer.zero_grad()
                 training_loss += loss.item()
@@ -116,7 +120,11 @@ def evaluation_concepts(args, items):
             logger.info(f'[epoch {epoch}] train loss: {round(training_loss, 4)}')
 
         logger.info(f'Saving model checkpoint {MODELS[model_name_id]}')
-        torch.save(recommender_model.state_dict(), f'{MODELS[model_name_id]}.bin')
+
+        os.makedirs("./models", exist_ok=True)
+        duplication = 'not_duplicated' if args.remove_duplicates else 'duplicated'
+        torch.save(recommender_model.state_dict(),
+                   f'models/{MODELS[model_name_id]}_{args.context_type}_{duplication}.bin')
 
         # evaluation phase
         recommender_model.eval()
@@ -152,23 +160,24 @@ def evaluation_concepts(args, items):
 
 
 def example_recommendation(args):
-    classes = ['statechart', 'graph',
-               'social', 'petri', 'maven',
-               'expression', 'binaryexpression',
-               'eclass', 'feature']
-
     w2v_model = load_model(args.model, args.embeddings_out)
     recommender_model = RecommenderModel(np.array(w2v_model.vectors), args).to(args.device)
-    recommender_model.load_state_dict(torch.load(f'{args.model}.bin'))
+    duplication = 'not_duplicated' if args.remove_duplicates else 'duplicated'
+    recommender_model.load_state_dict(torch.load(f'models/{args.model}_{args.context_type}_{duplication}.bin'))
     recommender_model.eval()
 
-    for c in classes:
-        if c not in w2v_model.key_to_index:
-            logger.info(f'{c} not in the vocab of {args.model}')
+    logger.info(f'Introduce as input your {args.context_type} name')
+    logger.info(f'To exit press ctrl + d')
+    for line in sys.stdin:
+        word = line.rstrip()
+        if word not in w2v_model.key_to_index:
+            logger.info(f'Word {word} not in vocab')
+            logger.info(f'Introduce as input your {args.context_type}')
             continue
-        context = torch.tensor([w2v_model.key_to_index[c]])
+        context = torch.tensor([w2v_model.key_to_index[word]])
         output_lsfm = recommender_model(context.to(args.device))
         top10 = torch.topk(output_lsfm, k=10, dim=1).indices.cpu().detach().tolist()[0]
-        logger.info(f'-------Recommendations for {c}-------')
+        logger.info(f'-------Recommendations for {word}-------')
         for r in top10:
             logger.info(f'{w2v_model.index_to_key[r]}')
+        logger.info(f'Introduce as input your {args.context_type}')

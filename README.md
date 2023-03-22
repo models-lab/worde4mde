@@ -49,14 +49,15 @@ TODO
 
 Run the training procedure (by default all pdfs have to be placed in a folder called `docs`):
 ```shell
-python main.py --train
+python main.py --train --w2v_algorithm skip_gram --training_dataset docs/modelling --folder_out_embeddings skip_gram_modelling
 ```
 
 ## Exploring embeddings 📋
 
 Word similarity:
 ```shell
-python main.py --test_similarity --model word2vec-mde
+python main.py --test_similarity --model glove-mde
+python main.py --test_similarity --model skip_gram-mde
 python main.py --test_similarity --model glove-wiki-gigaword-300
 python main.py --test_similarity --model word2vec-google-news-300
 ```
@@ -81,13 +82,18 @@ cd java/parser
 mvn compile
 mvn exec:java
 cd ../..
-python main.py --evaluation_metamodel_concepts --device cpu
-python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu
+python main.py --evaluation_metamodel_concepts --device cpu --context_type EClass
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EClass
+python main.py --evaluation_metamodel_concepts --device cpu --context_type EPackage
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EPackage
+python main.py --evaluation_metamodel_concepts --device cpu --context_type EEnum
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EEnum
 ```
 
 Example of recommendations:
 ```shell
-python main.py --example_recommendation --model word2vec-mde
-python main.py --example_recommendation --model glove-wiki-gigaword-300
-python main.py --example_recommendation --model word2vec-google-news-300
+python main.py --example_recommendation --model glove-mde --context_type {EClass, EPackage, EEnum}
+python main.py --example_recommendation --model skip_gram-mde --context_type {EClass, EPackage, EEnum}
+python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type {EClass, EPackage, EEnum}
+python main.py --example_recommendation --model word2vec-google-news-300 --context_type {EClass, EPackage, EEnum}
 ```

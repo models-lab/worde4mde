@@ -31,6 +31,7 @@ def main(args):
     if args.evaluation_metamodel_concepts:
         items = preprocess_dataset_metamodel_concepts(args)
         logger.info(f'Finish preprocessing, number of items: {len(items)}')
+        logger.info(f'Context type: {args.context_type}')
         avg = np.mean([len(item['recommendations']) for item in items])
         std = np.std([len(item['recommendations']) for item in items])
         logger.info(f'Avg recommendations: {avg}+-{std}')
@@ -85,12 +86,17 @@ if __name__ == '__main__':
     parser.add_argument('--training_dataset_concepts', default='./java/parser/out',
                         help='Path to the concepts modelset dataset')
     parser.add_argument('--embeddings_out', default='./out',
+                        help='root folder of the embeddings')
+    parser.add_argument('--folder_out_embeddings', default='skip_gram_modelling',
                         help='Path to the where the embeddings are/will be saved')
     parser.add_argument('--seed', help='seed.', type=int, default=123)
     parser.add_argument('--folds', help='folds.', type=int, default=10)
     parser.add_argument('--model', default='word2vec-mde',
                         help='w2v model',
                         choices=MODELS)
+    parser.add_argument('--w2v_algorithm', default='skip_gram',
+                        help='w2v model to train embeddings',
+                        choices=['skip_gram', 'cbow'])
     parser.add_argument('--model_type', default='ecore',
                         help='ecore or uml',
                         choices=['ecore', 'uml'])
@@ -103,6 +109,8 @@ if __name__ == '__main__':
     parser.add_argument('--evaluation_metamodel_concepts', help='Evaluate embeddings in metamodel concept '
                                                                 'recommendation',
                         action='store_true')
+    parser.add_argument('--context_type', help='Recommendation of structural features, classifiers, or literals',
+                        default='EClass', choices=['EClass', 'EPackage', 'EEnum'])
     parser.add_argument('--example_recommendation', help='Example recommendation',
                         action='store_true')
     parser.add_argument('--remove_duplicates', help='Remove duplicate models', action='store_true')

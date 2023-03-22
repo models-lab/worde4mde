@@ -8,6 +8,7 @@ import numpy as np
 from modelset import load
 from scikit_posthocs import posthoc_wilcoxon
 from scipy import stats
+from scipy.stats import ttest_rel
 from sklearn.cluster import KMeans
 from sklearn.metrics import balanced_accuracy_score, v_measure_score
 from sklearn.model_selection import StratifiedKFold
@@ -156,10 +157,7 @@ def evaluation_metamodel_classification(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
-        if m == 'word2vec-mde':
-            w2v_model = load_model(m, args.embeddings_out)
-        else:
-            w2v_model = load_model(m)
+        w2v_model = load_model(m, args.embeddings_out)
         X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
         # X_models[m] = X_models[m] / np.linalg.norm(X_models[m], axis=1, ord=2)[:, np.newaxis]
 
@@ -190,10 +188,13 @@ def evaluation_metamodel_classification(args):
     logger.info('------Results------')
     for m in MODELS:
         logger.info(f'B. Accuracy for {m}: {results[m]}')
-    logger.info('------Tests------')
+    logger.info('------Tests with adjustment------')
     logger.info(stats.friedmanchisquare(*[scores[m] for m in MODELS]))
     p_adjust = 'bonferroni'
     logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS], p_adjust=p_adjust)}')
+
+    logger.info('------Tests without adjustment------')
+    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS], p_adjust=None)}')
 
 
 def evaluation_metamodel_clustering(args):
@@ -207,10 +208,7 @@ def evaluation_metamodel_clustering(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
-        if m == 'word2vec-mde':
-            w2v_model = load_model(m, args.embeddings_out)
-        else:
-            w2v_model = load_model(m)
+        w2v_model = load_model(m, args.embeddings_out)
         X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
 
     results = defaultdict(list)
@@ -229,19 +227,5 @@ def evaluation_metamodel_clustering(args):
     p_adjust = 'bonferroni'
     logger.info(f'\n{posthoc_wilcoxon([results[m] for m in MODELS], p_adjust=p_adjust)}')
 
-
-def compute_intersecion_vocabs(args):
-    modelset_df, dataset = set_up_modelset(args)
-    ids = list(modelset_df['id'])
-
-    # get vocab modelset
-    logger.info(f'Number of models {len(modelset_df)}')
-    corpus = [dataset.as_txt(i) for i in ids]
-    vocab_modelset = get_vocab_modelset(corpus)
-    for m in MODELS:
-        if m == 'word2vec-mde':
-            w2v_model = load_model(m, args.embeddings_out)
-        else:
-            w2v_model = load_model(m)
-        intersection = [w for w in vocab_modelset if w in w2v_model.key_to_index]
-        logger.info(f'For model {m} coverage: {float(len(intersection)) / (float(len(vocab_modelset)))}')
+    logger.info('------Tests without adjustment------')
+    logger.info(f'\n{posthoc_wilcoxon([results[m] for m in MODELS], p_adjust=None)}')
