@@ -6,6 +6,7 @@ from pprint import pprint
 import gensim
 import matplotlib.pyplot as plt
 import numpy as np
+import pdftotext
 from gensim import corpora
 from nltk.corpus import stopwords
 from tqdm import tqdm
@@ -46,6 +47,12 @@ def topic_analysis(sentences):
     pprint(lda_model.print_topics())
 
 
+def number_of_pages(file):
+    with open(file, "rb") as f:
+        pdf = pdftotext.PDF(f)
+    return len(pdf)
+
+
 def main(args):
     logger = logging.getLogger()
 
@@ -53,24 +60,39 @@ def main(args):
     logger.info(f'Number of pdfs: {len(files)}')
 
     sentences = []
+    pdfs_parsed = 0
+    pages = 0
     for f in tqdm(files, desc='Preprocessing files'):
-        content = read_pdf(f)
+        try:
+            content = read_pdf(f)
+        except:
+            logging.getLogger().info(f'Error in file {f}')
+            continue
+        pdfs_parsed += 1
+        pages += number_of_pages(f)
         tokens = preprocess_doc(content)
         sentences += tokens
 
     # generate_wordcloud(sentences)
     # topic_analysis(sentences)
+    unique_tokens = set([])
+    for sentence in sentences:
+        for token in sentence:
+            unique_tokens.add(token)
 
     logger.info(f'Number of sentences: {len(sentences)}')
     sent_lens = [len(sentence) for sentence in sentences]
     number_tokens = sum(sent_lens)
     logger.info(f'Number of tokens: {number_tokens}')
+    logger.info(f'Number of unique tokens: {len(unique_tokens)}')
     logger.info(f'Sentence length avg+-std: {np.mean(sent_lens):.4f} +- {np.std(sent_lens):.4f}')
+    logger.info(f'Number of pdfs parsed: {pdfs_parsed}')
+    logger.info(f'Number of pages: {pages}')
 
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Script for exploring the corpus')
-    parser.add_argument('--corpus', default='./docs',
+    parser.add_argument('--corpus', default='./docs/modelling',
                         help='Path to the w2v dataset')
     parser.add_argument('--log_file', default='info_exploring.log',
                         help='Log file')
