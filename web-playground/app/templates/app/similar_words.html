@@ -1,0 +1,24 @@
+<div class="form">
+  <form class="input_part" action="/app/similar_words" method="post">
+
+    <!--
+    <label for="term">Modeling term:</label>    
+    <input type="text" id="term" name="term" required minlength="2" maxlength="128" size="10">
+    -->
+
+    {% csrf_token %}
+    {{ form_sim.as_p }}
+
+    <input type="submit" value="Search">
+  </form>
+
+    <div class="solution_part">
+      <ul>
+        {% for word in similar_words %}
+        <li>{{ word }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+</div>
+

@@ -19,11 +19,11 @@ logger = logging.getLogger()
 
 
 class RecommenderModel(nn.Module):
-    def __init__(self, vectors, args):
+    def __init__(self, vectors, device):
         super().__init__()
         self.in_layer = nn.Embedding.from_pretrained(torch.from_numpy(vectors).float())
         self.in_layer.weight.requires_grad = False
-        self.embedding_weights = torch.from_numpy(vectors).float().to(args.device)
+        self.embedding_weights = torch.from_numpy(vectors).float().to(device)
         self.embedding_weights.requires_grad = False
         self.linear_layers_in = nn.Parameter(
             data=torch.zeros(vectors.shape[1], 128))  # vectors.shape[1]

@@ -1,0 +1,133 @@
+{% load static %}
+
+<!doctype html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="description" content="">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>WordE4MDE - Word Embeddings for the Modelling community</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,600,700,800,900" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/railscasts.min.css">
+      <link rel="stylesheet" href="{% static 'scribbler-global.css'%}">
+      <link rel="stylesheet" href="{% static 'scribbler-landing.css'%}">
+      <link rel="author" href="humans.txt">
+  </head>
+  <body>
+    <nav>
+      <div class="logo"></div>
+      <ul class="menu">
+        <div class="menu__item toggle"><span></span></div>
+          <!--
+        <li class="menu__item"><a href="doc.html" class="link link--dark"><i class="fa fa-book"></i> Documentation</a></li>
+        -->
+        <li class="menu__item"><a href="" class="link link--dark"><i class="fa fa-github"></i> Github</a></li>
+      </ul>
+    </nav>
+    <div class="hero">
+      <h1 class="hero__title">Word Embeddings for MDE</h1>
+      <p class="hero__description">Trained with and for modelling</p>
+    </div>
+    <!--
+    <div class="hero__terminal">
+      <pre>
+        <code class="shell-session demo">hyperyolo ~ $ </code>
+      </pre>
+    </div>
+    -->
+    <div class="interactive__block">
+      <div class="installation">
+        <h3 class="section__title">&nbsp;</h3>
+        <div class="tab__container">
+          <ul class="tab__menu">
+            <li class="tab {{ similar_active }}" data-tab="similar">Similar words</li>
+            <li class="tab {{ recommendation_active }}" data-tab="recommendation">Recommendation</li>
+          </ul>
+          <div class="tab__pane {{ similar_active }} similar">
+              {% include "app/similar_words.html" %}
+          </div>
+          <div class="tab__pane {{ recommendation_active }} recommendation">
+              {% include "app/recommendation.html" %}
+          </div>
+<!--
+
+          <pre class="nohighlight code">
+            <code class="tab__pane active mac">$  brew install scribbler</code>
+            <code class="tab__pane linux">$  apt-get install scribbler</code>
+            <code class="tab__pane win">$  gem install scribbler</code>
+          </pre>
+        -->
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+      <div class="installation">
+        <h3 class="section__title">Installation</h3>
+        <div class="tab__container">
+          <ul class="tab__menu">
+            <li class="tab active" data-tab="all">all</li>
+          </ul>
+          <pre class="nohighlight code">
+            <code class="tab__pane active all">$  pip install worde4mde  # This will be available after double-blind review!</code>
+          </pre>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature__item">
+          <h3 class="section__title">Specific</h3>
+          <p>Trained on a large corpus of modelling texts, extracted from venues like MoDELS, SoSyM, ECMFA, etc.</p>
+        </div>
+        <div class="feature__item">
+          <h3 class="section__title">Useful</h3>
+          <p>Improve the performance of your ML models!.</p>
+        </div>
+        <div class="feature__item">
+          <h3 class="section__title">Easy to use</h3>
+          <p>Install and use the embeddings using regular Python libraries.</p>
+        </div>
+
+      </div>
+
+      <div class="callout">
+        <p>Go to our GitHub site and check the usage examples!</p>
+        <a href="http://github.com/blind-review" class="button--primary">GitHub</a>
+      </div>
+    </div>
+    <div class="changelog">
+      <div class="wrapper">
+        <h3 class="section__title">Changelog</h3>
+        <div class="changelog__item">
+          <div class="changelog__meta">
+            <h4 class="changelog__title">v1.0</h4>
+            <small class="changelog__date">2023/04/01</small>
+          </div>
+          <div class="changelog__detail">
+            <ul>
+              <li>GloVe and Word2Vec embeddings</li>
+              <li>Evaluation with model classification, clustering and recommendation</li>
+            </ul>
+          </div>
+        </div>
+          <!--
+        <div class="changelog__callout">
+          <a href="#" class="button--secondary">Checkout Full Log</a>
+        </div>
+        -->
+      </div>
+    </div>
+    <footer class="footer">Based on <a href="https://github.com/georgebrata/html-templates" target="_blank" class="link link--light">Scribbler/codrops template</a>.</footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="{% static 'scribbler.js'%}"></script>
+  </body>
+</html>
+
+<!--
+<div>
+  This is site is a simple playground for the embeddings released as part of the paper "Word embeddings for Model-Driven Engineering".
+  
+</div>
+-->

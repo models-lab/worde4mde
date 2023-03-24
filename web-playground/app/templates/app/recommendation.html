@@ -1,0 +1,17 @@
+<div class="form">
+    <form class="input_part" action="/app/recommendation" method="post">
+
+        {% csrf_token %}
+        {{ form_rec.as_p }}
+
+        <input type="submit" value="Recommend">
+    </form>
+    <div class="solution_part">
+        <ul>
+            {% for word in recommendations %}
+                <li>{{ word }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
