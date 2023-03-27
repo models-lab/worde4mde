@@ -89,7 +89,7 @@ if __name__ == '__main__':
                         help='root folder of the embeddings')
     parser.add_argument('--folder_out_embeddings', default='skip_gram_modelling',
                         help='Path to the where the embeddings are/will be saved')
-    parser.add_argument('--seed', help='seed.', type=int, default=123)
+    parser.add_argument('--seed', help='seed.', type=int, default=123)  # 12390
     parser.add_argument('--folds', help='folds.', type=int, default=10)
     parser.add_argument('--model', default='word2vec-mde',
                         help='w2v model',

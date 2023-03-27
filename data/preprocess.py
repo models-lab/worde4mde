@@ -15,7 +15,7 @@ from w2v.w2v import MODELS, load_model
 
 def read_pdf(file):
     with open(file, "rb") as f:
-        pdf = pdftotext.PDF(f)
+        pdf = pdftotext.PDF(f, raw=True)
     all_pdf = "\n".join(pdf)
     return all_pdf
 

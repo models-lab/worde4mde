@@ -5,13 +5,13 @@ import pdftotext
 
 from data.preprocess import preprocess_sentence, read_pdf, preprocess_doc
 
-FILE_TEST = 'docs/sosym/441118.pdf'
+FILE_TEST = 'docs/modelling/sosym/441118.pdf'
 nltk.download('punkt')
 
 
 def get_pdf():
     with open(FILE_TEST, "rb") as f:
-        pdf = pdftotext.PDF(f)
+        pdf = pdftotext.PDF(f, raw=True)
     return pdf
 
 
