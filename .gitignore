@@ -172,3 +172,4 @@ out
 /stopwords.txt
 /wordcloud.png
 *.bin
+/tokens_per_venue.pkl

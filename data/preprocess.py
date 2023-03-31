@@ -4,12 +4,10 @@ import logging
 import re
 
 import pdftotext
-from modelset import load
 from nltk.tokenize import word_tokenize, sent_tokenize
 from tqdm import tqdm
 
-from modelset_evaluation.evaluation_classification_clustering import get_multiset, tokenizer, get_duplicates, \
-    set_up_modelset
+from modelset_evaluation.evaluation_classification_clustering import set_up_modelset
 from w2v.w2v import MODELS, load_model
 
 
@@ -17,6 +15,10 @@ def read_pdf(file):
     with open(file, "rb") as f:
         pdf = pdftotext.PDF(f, raw=True)
     all_pdf = "\n".join(pdf)
+    # trans-\nformation
+    all_pdf = re.sub(r'-\n', '', all_pdf)
+    # remove urls
+    all_pdf = re.sub(r"http\S+", "", all_pdf)
     return all_pdf
 
 

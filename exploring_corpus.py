@@ -1,6 +1,8 @@
 import glob
 import logging
+import pickle
 from argparse import ArgumentParser
+from collections import defaultdict
 from pprint import pprint
 
 import gensim
@@ -49,7 +51,7 @@ def topic_analysis(sentences):
 
 def number_of_pages(file):
     with open(file, "rb") as f:
-        pdf = pdftotext.PDF(f)
+        pdf = pdftotext.PDF(f, raw=True)
     return len(pdf)
 
 
@@ -62,6 +64,7 @@ def main(args):
     sentences = []
     pdfs_parsed = 0
     pages = 0
+    tokens_per_venue = defaultdict(int)
     for f in tqdm(files, desc='Preprocessing files'):
         try:
             content = read_pdf(f)
@@ -72,6 +75,9 @@ def main(args):
         pages += number_of_pages(f)
         tokens = preprocess_doc(content)
         sentences += tokens
+
+        venue = f.split('/')[3]
+        tokens_per_venue[venue] += sum([len(s) for s in tokens])
 
     # generate_wordcloud(sentences)
     # topic_analysis(sentences)
@@ -88,6 +94,10 @@ def main(args):
     logger.info(f'Sentence length avg+-std: {np.mean(sent_lens):.4f} +- {np.std(sent_lens):.4f}')
     logger.info(f'Number of pdfs parsed: {pdfs_parsed}')
     logger.info(f'Number of pages: {pages}')
+    logger.info(tokens_per_venue)
+
+    with open('tokens_per_venue.pkl', 'wb') as f:
+        pickle.dump(tokens_per_venue, f)
 
 
 if __name__ == '__main__':
