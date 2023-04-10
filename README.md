@@ -40,21 +40,26 @@ After that, you need to download ModelSet dataset.
 python -m modelset.downloader
 ```
 
-## Train Word2vec4MDE from scratch 🚀
+## Download trained embeddings 🚀
 
-Download the dataset of papers and put it in a folder:
-```shell
-TODO
-```
+To download the WordE4MDE embeddings just run the following:
 
-Run the training procedure (by default all pdfs have to be placed in a folder called `docs`):
 ```shell
-python main.py --train --w2v_algorithm skip_gram --training_dataset docs/modelling --folder_out_embeddings skip_gram_modelling
+./scripts/download_embeddings.sh
 ```
 
 ## Exploring embeddings 📋
 
-Word similarity:
+Let us consider this list of words:
+```python
+['state', 'atl', 'dsl', 'grammar',
+'petri', 'statechart', 'ecore', 'epsilon',
+'qvt', 'transformation']
+```
+
+The following commands compute, for each word model, the top 10 similar words 
+to each one of the words of the previous list:
+
 ```shell
 python main.py --test_similarity --model glove-mde
 python main.py --test_similarity --model skip_gram-mde
@@ -66,13 +71,11 @@ python main.py --test_similarity --model word2vec-google-news-300
 
 Meta-model classification task:
 ```shell
-python main.py --evaluation_metamodel_classification
 python main.py --evaluation_metamodel_classification --remove_duplicates
 ```
 
 Meta-model clustering task:
 ```shell
-python main.py --evaluation_metamodel_clustering
 python main.py --evaluation_metamodel_clustering --remove_duplicates
 ```
 
@@ -82,18 +85,15 @@ cd java/parser
 mvn compile
 mvn exec:java
 cd ../..
-python main.py --evaluation_metamodel_concepts --device cpu --context_type EClass
-python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EClass
-python main.py --evaluation_metamodel_concepts --device cpu --context_type EPackage
-python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EPackage
-python main.py --evaluation_metamodel_concepts --device cpu --context_type EEnum
 python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EEnum
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EPackage
+python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EClass
 ```
 
 Example of recommendations:
 ```shell
-python main.py --example_recommendation --model glove-mde --context_type {EClass, EPackage, EEnum}
-python main.py --example_recommendation --model skip_gram-mde --context_type {EClass, EPackage, EEnum}
-python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type {EClass, EPackage, EEnum}
-python main.py --example_recommendation --model word2vec-google-news-300 --context_type {EClass, EPackage, EEnum}
+python main.py --example_recommendation --model glove-mde --context_type {EClass, EPackage, EEnum} --remove_duplicates
+python main.py --example_recommendation --model skip_gram-mde --context_type {EClass, EPackage, EEnum} --remove_duplicates
+python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type {EClass, EPackage, EEnum} --remove_duplicates
+python main.py --example_recommendation --model word2vec-google-news-300 --context_type {EClass, EPackage, EEnum} --remove_duplicates
 ```
