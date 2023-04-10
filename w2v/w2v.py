@@ -64,7 +64,7 @@ def test_similarity_word2vec(args):
     reloaded_word_vectors = load_model(args.model, args.embeddings_out)
     for word in ['state', 'atl', 'dsl', 'grammar',
                  'petri', 'statechart', 'ecore', 'epsilon',
-                 'qvt', 'transformation', 'cuadrado', 'lara']:
+                 'qvt', 'transformation']:
         if word in reloaded_word_vectors.key_to_index:
             m_similar = ', '.join([p[0] for p in reloaded_word_vectors.most_similar(positive=[word])])
             logger.info(f'Top 10 similar words to \"{word}\": {m_similar}')
