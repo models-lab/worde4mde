@@ -21,14 +21,21 @@ def load_model(model, embeddings_file=None):
 
 VECTORS_FOLDER = os.path.join(os.path.dirname(__file__), '..', '..', 'vectors')
 
+print("Loading Skip-gram MDE model...")
 SKIPGRAM_MODEL = load_model('word2vec-mde',
                             os.path.join(VECTORS_FOLDER, 'skip_gram_modelling', 'skip_gram_vectors.kv'))
+
+print("Loading GloVe MDE model...")
 GLOVE_MDE_MODEL = None
 # GLOVE_MDE_MODEL = load_model('word2vec-mde',
 #                             os.path.join(os.path.dirname(__file__), '..', '..', 'vectors', 'glove_modelling',
 #                                          'vectors.txt'))
-GLOVE_MODEL = None  # load_model('glove-wiki-gigaword-300')
-WORD2VEC_MODEL = None  # load_model('word2vec-google-news-300')
+
+print("Loading GloVe model...")
+GLOVE_MODEL = load_model('glove-wiki-gigaword-300')
+
+print("Loading Word2Vec model...")
+WORD2VEC_MODEL = load_model('word2vec-google-news-300')
 
 
 class SearchForm(forms.Form):
