@@ -15,6 +15,14 @@ import os
 def load_model(model, embeddings_file=None):
     if model == 'word2vec-mde':
         reloaded_word_vectors = KeyedVectors.load(embeddings_file)
+    elif model == 'glove-mde':
+        from gensim.test.utils import get_tmpfile
+        from gensim.scripts.glove2word2vec import glove2word2vec
+
+        glove_file = embeddings_file
+        tmp_file = get_tmpfile("test_word2vec.txt")
+        _ = glove2word2vec(glove_file, tmp_file)
+        reloaded_word_vectors = KeyedVectors.load_word2vec_format(tmp_file)
     else:
         reloaded_word_vectors = api.load(model)
     return reloaded_word_vectors
@@ -26,10 +34,9 @@ SKIPGRAM_MODEL = load_model('word2vec-mde',
                             os.path.join(VECTORS_FOLDER, 'skip_gram_modelling', 'skip_gram_vectors.kv'))
 
 print("Loading GloVe MDE model...")
-GLOVE_MDE_MODEL = None
-# GLOVE_MDE_MODEL = load_model('word2vec-mde',
-#                             os.path.join(os.path.dirname(__file__), '..', '..', 'vectors', 'glove_modelling',
-#                                          'vectors.txt'))
+GLOVE_MDE_MODEL = load_model('glove-mde',
+                             os.path.join(os.path.dirname(__file__), '..', '..', 'vectors', 'glove_modelling',
+                                          'vectors.txt'))
 
 print("Loading GloVe model...")
 GLOVE_MODEL = load_model('glove-wiki-gigaword-300')
@@ -147,6 +154,10 @@ REC_SKIPGRAM_ECLASS = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL,
 REC_SKIPGRAM_EPACKAGE = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL, 'EPackage')
 REC_SKIPGRAM_EENUM = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL, 'EEnum')
 
+REC_GLOVEMDE_ECLASS = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EClass')
+REC_GLOVEMDE_EPACKAGE = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EPackage')
+REC_GLOVEMDE_EENUM = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EEnum')
+
 
 def get_recommendation_model(model, context_type):
     if model == 'skip_gram_mde':
@@ -156,8 +167,15 @@ def get_recommendation_model(model, context_type):
             return REC_SKIPGRAM_EPACKAGE
         elif context_type == 'EEnum':
             return REC_SKIPGRAM_EENUM
+    elif model == 'glove_mde':
+        if context_type == 'EClass':
+            return REC_GLOVEMDE_ECLASS
+        elif context_type == 'EPackage':
+            return REC_GLOVEMDE_EPACKAGE
+        elif context_type == 'EEnum':
+            return REC_GLOVEMDE_EENUM
 
-    print("Not loaded")
+    print("Not loaded: ", model)
     return None
 
 
