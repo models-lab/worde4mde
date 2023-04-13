@@ -158,6 +158,14 @@ REC_GLOVEMDE_ECLASS = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'E
 REC_GLOVEMDE_EPACKAGE = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EPackage')
 REC_GLOVEMDE_EENUM = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EEnum')
 
+REC_GLOVEWIKI_ECLASS = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EClass')
+REC_GLOVEWIKI_EPACKAGE = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EPackage')
+REC_GLOVEWIKI_EENUM = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EEnum')
+
+REC_W2V_ECLASS = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EClass')
+REC_W2V_EPACKAGE = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EPackage')
+REC_W2V_EENUM = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EEnum')
+
 
 def get_recommendation_model(model, context_type):
     if model == 'skip_gram_mde':
@@ -174,6 +182,20 @@ def get_recommendation_model(model, context_type):
             return REC_GLOVEMDE_EPACKAGE
         elif context_type == 'EEnum':
             return REC_GLOVEMDE_EENUM
+    elif model == 'glove':
+        if context_type == 'EClass':
+            return REC_GLOVEWIKI_ECLASS
+        elif context_type == 'EPackage':
+            return REC_GLOVEWIKI_EPACKAGE
+        elif context_type == 'EEnum':
+            return REC_GLOVEWIKI_EENUM
+    elif model == 'word2vec':
+        if context_type == 'EClass':
+            return REC_W2V_ECLASS
+        elif context_type == 'EPackage':
+            return REC_W2V_EPACKAGE
+        elif context_type == 'EEnum':
+            return REC_W2V_EENUM
 
     print("Not loaded: ", model)
     return None
