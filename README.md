@@ -1,4 +1,4 @@
-# Word2vec4MDE
+# WordE4MDE
 
 ## Installation 🛠
 
@@ -50,15 +50,15 @@ To download the WordE4MDE embeddings just run the following:
 
 ## Exploring embeddings 📋
 
-Let us consider this list of words:
+Let us consider the following list of words:
 ```python
 ['state', 'atl', 'dsl', 'grammar',
 'petri', 'statechart', 'ecore', 'epsilon',
 'qvt', 'transformation']
 ```
 
-The following commands compute, for each word model, the top 10 similar words 
-to each one of the words of the previous list:
+The commands below compute, for each word model, the top 10 similar words 
+for each word of the previous list:
 
 ```shell
 python main.py --test_similarity --model glove-mde
@@ -79,7 +79,8 @@ Meta-model clustering task:
 python main.py --evaluation_metamodel_clustering --remove_duplicates
 ```
 
-Meta-model concepts task:
+Meta-model concepts task (the parser is applied to the ModelSet dataset, 
+and then the recommendation systems are trained and evaluated):
 ```shell
 cd java/parser
 mvn compile
