@@ -10,3 +10,4 @@ torchvision
 torchaudio
 prettytable
 wordcloud
+gdown
