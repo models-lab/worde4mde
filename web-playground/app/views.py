@@ -131,110 +131,111 @@ def similar_words(request):
         return render(request, 'app/index.html', context)
 
 
-# add folder to python path
-import sys
+    
+# Remove recommendation part because it takes a lot of memory
+# import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'modelset_evaluation'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
-from evaluation_metamodel_concepts import RecommenderModel
-import torch
-import numpy as np
-
-
-def load_recommendation_model(model, loaded_model, context_type):
-    # w2v_model = load_model(model, embeddings_file)
-    recommender_model = RecommenderModel(np.array(loaded_model.vectors), "cpu").to("cpu")
-    rec_file = os.path.join(VECTORS_FOLDER, 'recommendation', f'{model}_{context_type}_not_duplicated.bin')
-    recommender_model.load_state_dict(torch.load(rec_file))
-    recommender_model.eval()
-    return recommender_model
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'modelset_evaluation'))
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+# from evaluation_metamodel_concepts import RecommenderModel
+# import torch
+# import numpy as np
 
 
-REC_SKIPGRAM_ECLASS = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL, 'EClass')
-REC_SKIPGRAM_EPACKAGE = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL, 'EPackage')
-REC_SKIPGRAM_EENUM = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL, 'EEnum')
-
-REC_GLOVEMDE_ECLASS = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EClass')
-REC_GLOVEMDE_EPACKAGE = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EPackage')
-REC_GLOVEMDE_EENUM = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EEnum')
-
-REC_GLOVEWIKI_ECLASS = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EClass')
-REC_GLOVEWIKI_EPACKAGE = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EPackage')
-REC_GLOVEWIKI_EENUM = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EEnum')
-
-REC_W2V_ECLASS = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EClass')
-REC_W2V_EPACKAGE = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EPackage')
-REC_W2V_EENUM = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EEnum')
+# def load_recommendation_model(model, loaded_model, context_type):
+#     # w2v_model = load_model(model, embeddings_file)
+#     recommender_model = RecommenderModel(np.array(loaded_model.vectors), "cpu").to("cpu")
+#     rec_file = os.path.join(VECTORS_FOLDER, 'recommendation', f'{model}_{context_type}_not_duplicated.bin')
+#     recommender_model.load_state_dict(torch.load(rec_file))
+#     recommender_model.eval()
+#     return recommender_model
 
 
-def get_recommendation_model(model, context_type):
-    if model == 'skip_gram_mde':
-        if context_type == 'EClass':
-            return REC_SKIPGRAM_ECLASS
-        elif context_type == 'EPackage':
-            return REC_SKIPGRAM_EPACKAGE
-        elif context_type == 'EEnum':
-            return REC_SKIPGRAM_EENUM
-    elif model == 'glove_mde':
-        if context_type == 'EClass':
-            return REC_GLOVEMDE_ECLASS
-        elif context_type == 'EPackage':
-            return REC_GLOVEMDE_EPACKAGE
-        elif context_type == 'EEnum':
-            return REC_GLOVEMDE_EENUM
-    elif model == 'glove':
-        if context_type == 'EClass':
-            return REC_GLOVEWIKI_ECLASS
-        elif context_type == 'EPackage':
-            return REC_GLOVEWIKI_EPACKAGE
-        elif context_type == 'EEnum':
-            return REC_GLOVEWIKI_EENUM
-    elif model == 'word2vec':
-        if context_type == 'EClass':
-            return REC_W2V_ECLASS
-        elif context_type == 'EPackage':
-            return REC_W2V_EPACKAGE
-        elif context_type == 'EEnum':
-            return REC_W2V_EENUM
+# REC_SKIPGRAM_ECLASS = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL, 'EClass')
+# REC_SKIPGRAM_EPACKAGE = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL, 'EPackage')
+# REC_SKIPGRAM_EENUM = load_recommendation_model('skip_gram-mde', SKIPGRAM_MODEL, 'EEnum')
 
-    print("Not loaded: ", model)
-    return None
+# REC_GLOVEMDE_ECLASS = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EClass')
+# REC_GLOVEMDE_EPACKAGE = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EPackage')
+# REC_GLOVEMDE_EENUM = load_recommendation_model('glove-mde', GLOVE_MDE_MODEL, 'EEnum')
+
+# REC_GLOVEWIKI_ECLASS = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EClass')
+# REC_GLOVEWIKI_EPACKAGE = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EPackage')
+# REC_GLOVEWIKI_EENUM = load_recommendation_model('glove-wiki-gigaword-300', GLOVE_MODEL, 'EEnum')
+
+# REC_W2V_ECLASS = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EClass')
+# REC_W2V_EPACKAGE = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EPackage')
+# REC_W2V_EENUM = load_recommendation_model('word2vec-google-news-300', WORD2VEC_MODEL, 'EEnum')
 
 
-def recommend(rec_model, w2v_model, context_name):
-    context = torch.tensor([w2v_model.key_to_index[context_name]])
-    output_lsfm = rec_model(context.to("cpu"))
-    top10 = torch.topk(output_lsfm, k=10, dim=1).indices.cpu().detach().tolist()[0]
-    return [w2v_model.index_to_key[r] for r in top10]
+# def get_recommendation_model(model, context_type):
+#     if model == 'skip_gram_mde':
+#         if context_type == 'EClass':
+#             return REC_SKIPGRAM_ECLASS
+#         elif context_type == 'EPackage':
+#             return REC_SKIPGRAM_EPACKAGE
+#         elif context_type == 'EEnum':
+#             return REC_SKIPGRAM_EENUM
+#     elif model == 'glove_mde':
+#         if context_type == 'EClass':
+#             return REC_GLOVEMDE_ECLASS
+#         elif context_type == 'EPackage':
+#             return REC_GLOVEMDE_EPACKAGE
+#         elif context_type == 'EEnum':
+#             return REC_GLOVEMDE_EENUM
+#     elif model == 'glove':
+#         if context_type == 'EClass':
+#             return REC_GLOVEWIKI_ECLASS
+#         elif context_type == 'EPackage':
+#             return REC_GLOVEWIKI_EPACKAGE
+#         elif context_type == 'EEnum':
+#             return REC_GLOVEWIKI_EENUM
+#     elif model == 'word2vec':
+#         if context_type == 'EClass':
+#             return REC_W2V_ECLASS
+#         elif context_type == 'EPackage':
+#             return REC_W2V_EPACKAGE
+#         elif context_type == 'EEnum':
+#             return REC_W2V_EENUM
+
+#     print("Not loaded: ", model)
+#     return None
 
 
-def recommendation(request):
-    context = {
-        'recommendations': [],
-        'similar_active': None,
-        'recommendation_active': 'active',
-    }
-    form = SearchForm()
-    context['form_sim'] = form
+# def recommend(rec_model, w2v_model, context_name):
+#     context = torch.tensor([w2v_model.key_to_index[context_name]])
+#     output_lsfm = rec_model(context.to("cpu"))
+#     top10 = torch.topk(output_lsfm, k=10, dim=1).indices.cpu().detach().tolist()[0]
+#     return [w2v_model.index_to_key[r] for r in top10]
 
-    # if this is a POST request we need to process the form data
-    if request.method == 'POST':
-        form = RecommendationForm(request.POST)
-        if form.is_valid():
-            term = form.cleaned_data['term'].lower()
-            selected_model = form.cleaned_data['selected_model']
-            context_type = form.cleaned_data['contexts']
-            rec_model = get_recommendation_model(selected_model, context_type)
-            w2v_model = form.get_model()
 
-            if term not in w2v_model.key_to_index:
-                context['recommendations'].append('Word not in vocabulary')
-            else:
-                context['recommendations'] = recommend(rec_model, w2v_model, term)
+# def recommendation(request):
+#     context = {
+#         'recommendations': [],
+#         'similar_active': None,
+#         'recommendation_active': 'active',
+#     }
+#     form = SearchForm()
+#     context['form_sim'] = form
 
-            context['form_rec'] = form
-            return render(request, 'app/index.html', context)
-    else:
-        form = RecommendationForm()
-        context['form_rec'] = form
-        return render(request, 'app/index.html', context)
+#     # if this is a POST request we need to process the form data
+#     if request.method == 'POST':
+#         form = RecommendationForm(request.POST)
+#         if form.is_valid():
+#             term = form.cleaned_data['term'].lower()
+#             selected_model = form.cleaned_data['selected_model']
+#             context_type = form.cleaned_data['contexts']
+#             rec_model = get_recommendation_model(selected_model, context_type)
+#             w2v_model = form.get_model()
+
+#             if term not in w2v_model.key_to_index:
+#                 context['recommendations'].append('Word not in vocabulary')
+#             else:
+#                 context['recommendations'] = recommend(rec_model, w2v_model, term)
+
+#             context['form_rec'] = form
+#             return render(request, 'app/index.html', context)
+#     else:
+#         form = RecommendationForm()
+#         context['form_rec'] = form
+#         return render(request, 'app/index.html', context)
