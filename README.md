@@ -1,100 +1,35 @@
 # WordE4MDE
 
+WordE4MDE is a Python library that provides word embeddings for the MDE domain.
+
 ## Installation 🛠
 
-### With conda (recommended)
-
-This repo is written in Python and Java. Thus, I recommend to use conda. To initialize the conda environment,
-just execute:
-```shell
-sudo apt install build-essential libpoppler-cpp-dev pkg-config python3-dev
-conda env create --file=conda_venv.yml
-conda activate word2vec-mde
-python -m nltk.downloader all
+Using pip:
+```bash
+pip install worde4mde
 ```
 
-After that, you need to download ModelSet dataset as all the experiments were run over this dataset.
-```shell
-python -m modelset.downloader
-```
+## Usage
 
-### Without conda
-
-You need to install:
-- Python 3.8.X
-- Openjdk 1.8
-- Maven 3.8.6
-
-Generate a virtual environment and then install the requirements.
-
-```shell
-sudo apt install build-essential libpoppler-cpp-dev pkg-config python3-dev
-python3.8 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python -m nltk.downloader all
-```
-
-After that, you need to download ModelSet dataset.
-```shell
-python -m modelset.downloader
-```
-
-## Download trained embeddings 🚀
-
-To download the WordE4MDE embeddings just run the following:
-
-```shell
-./scripts/download_embeddings.sh
-```
-
-## Exploring embeddings 📋
-
-Let us consider the following list of words:
+First of all, you need to load the embeddings (currently supported: `'sgram-mde'` and `'glove-mde'`).
 ```python
-['state', 'atl', 'dsl', 'grammar',
-'petri', 'statechart', 'ecore', 'epsilon',
-'qvt', 'transformation']
+from worde4mde import load_embeddings
+sgram_mde = load_embeddings('sgram-mde')
 ```
 
-The commands below compute, for each word model, the top 10 similar words 
-for each word of the previous list:
+The `load_embeddings` function returns a `KeyedVectors` object from 
+the [gensim library](https://radimrehurek.com/gensim/models/keyedvectors.html). If you want to retrieve the most similar
+words to a given word, you can use the `most_similar` function:
 
-```shell
-python main.py --test_similarity --model glove-mde
-python main.py --test_similarity --model skip_gram-mde
-python main.py --test_similarity --model glove-wiki-gigaword-300
-python main.py --test_similarity --model word2vec-google-news-300
+```python
+word = 'ecore'
+sgram_mde.most_similar(positive=[word])
+>>> [('emf', 0.6336350440979004), ('metamodels', 0.5963817834854126), 
+     ('ecorebased', 0.5922590494155884), ... 
 ```
 
-## Using the embeddings for meta-model classification, clustering and recommendation 📋
-
-Meta-model classification task:
-```shell
-python main.py --evaluation_metamodel_classification --remove_duplicates
-```
-
-Meta-model clustering task:
-```shell
-python main.py --evaluation_metamodel_clustering --remove_duplicates
-```
-
-Meta-model concepts task (the parser is applied to the ModelSet dataset, 
-and then the recommendation systems are trained and evaluated):
-```shell
-cd java/parser
-mvn compile
-mvn exec:java
-cd ../..
-python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EEnum
-python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EPackage
-python main.py --evaluation_metamodel_concepts --remove_duplicates --device cpu --context_type EClass
-```
-
-Example of recommendations:
-```shell
-python main.py --example_recommendation --model glove-mde --context_type {EClass, EPackage, EEnum} --remove_duplicates
-python main.py --example_recommendation --model skip_gram-mde --context_type {EClass, EPackage, EEnum} --remove_duplicates
-python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type {EClass, EPackage, EEnum} --remove_duplicates
-python main.py --example_recommendation --model word2vec-google-news-300 --context_type {EClass, EPackage, EEnum} --remove_duplicates
+Furthermore, if you want to get the embedding of a given word, just write the following:
+```python
+sgram_mde[word]
+>>> [ 0.14674647  0.42704162  0.17717203  0.05179158  0.38020504 -0.00091264 ...
 ```
