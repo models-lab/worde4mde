@@ -33,3 +33,7 @@ Furthermore, if you want to get the embedding of a given word, just write the fo
 sgram_mde[word]
 >>> [ 0.14674647  0.42704162  0.17717203  0.05179158  0.38020504 -0.00091264 ...
 ```
+
+## Playground
+
+If you want to test the word embeddings without installation, you can use our [Playground](http://models-lab.inf.um.es/worde4mde/app/).
