@@ -98,3 +98,7 @@ python main.py --example_recommendation --model skip_gram-mde --context_type {EC
 python main.py --example_recommendation --model glove-wiki-gigaword-300 --context_type {EClass, EPackage, EEnum} --remove_duplicates
 python main.py --example_recommendation --model word2vec-google-news-300 --context_type {EClass, EPackage, EEnum} --remove_duplicates
 ```
+
+## Playground
+
+If you want to test the word embeddings without installation, you can use our [Playground](http://models-lab.inf.um.es/worde4mde/app/).
