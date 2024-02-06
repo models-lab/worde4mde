@@ -1,0 +1,2 @@
+python main.py --train --w2v_algorithm skip_gram --training_dataset docs/modelling --folder_out_embeddings skip_gram_modelling
+python main.py --train --w2v_algorithm cbow --training_dataset docs/modelling --folder_out_embeddings cbow_modelling
