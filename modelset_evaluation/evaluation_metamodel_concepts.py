@@ -78,6 +78,8 @@ def evaluation_concepts(args, items):
     # load all models
     models = []
     for m in MODELS:
+        if m != 'so_word2vec':
+            continue
         w2v_model = load_model(m, args.embeddings_out)
         models.append(w2v_model)
 
@@ -91,7 +93,9 @@ def evaluation_concepts(args, items):
                                        shuffle=True,
                                        collate_fn=collate_fn,
                                        num_workers=0)
-        recommender_model = RecommenderModel(np.array(w2v_model.vectors), args).to(args.device)
+        print(args.device + '\n')
+        print(type(args.device))
+        recommender_model = RecommenderModel(np.array(w2v_model.vectors), args.device).to(args.device)
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, recommender_model.parameters()), lr=0.001)
         criterion = nn.BCELoss(reduction='none')
 
@@ -150,7 +154,7 @@ def evaluation_concepts(args, items):
         for thr in THRESH:
             logger.info(f'[Evaluation] recall@{thr}: {round(np.mean(recalls[thr]), 4)}')
         results_recalls[MODELS[model_name_id]] = recalls
-
+    return
     logger.info('------Tests------')
     for thr in THRESH:
         logger.info(f'Recall@{thr}')

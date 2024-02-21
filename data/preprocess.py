@@ -2,6 +2,7 @@ import glob
 import json
 import logging
 import re
+import fasttext
 
 import pdftotext
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -9,7 +10,6 @@ from tqdm import tqdm
 
 from modelset_evaluation.evaluation_classification_clustering import set_up_modelset
 from w2v.w2v import MODELS, load_model
-
 
 def read_pdf(file):
     with open(file, "rb") as f:
@@ -35,9 +35,8 @@ def preprocess_sentence(string):
     # remove punctuation
     string = re.sub(r'[^\w\s]', '', string).strip()
 
-    # tokenization
+    # tokenization by words
     return word_tokenize(string)
-
 
 def preprocess_doc(string):
     # remove \n
@@ -49,7 +48,6 @@ def preprocess_doc(string):
     # remove short sentences
     return [s for s in sentences if len(s) > 5]
 
-
 def preprocess_dataset(args):
     files = glob.glob(args.training_dataset + "/**/*.pdf", recursive=True)
     result = []
@@ -60,6 +58,7 @@ def preprocess_dataset(args):
             logging.getLogger().info(f'Error in file {f}')
             continue
         tokens = preprocess_doc(content)
+        #print(tokens)
         result += tokens
     return result
 
@@ -97,6 +96,8 @@ def preprocess_dataset_metamodel_concepts(args):
 
     models = []
     for m in MODELS:
+        if m != 'so_word2vec':
+            continue
         w2v_model = load_model(m, args.embeddings_out)
         models.append(w2v_model)
     result = [normalize_item(item, models) for item in result]

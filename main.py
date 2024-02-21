@@ -12,16 +12,23 @@ from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_con
 from modelset_evaluation.evaluation_classification_clustering import evaluation_metamodel_classification, \
     evaluation_metamodel_clustering
 from modelset_evaluation.evaluation_metamodel_concepts import evaluation_concepts, example_recommendation
-from w2v.w2v import training_word2vec, test_similarity_word2vec, MODELS
-
+from w2v.w2v import training_word2vec, training_fasttext, test_similarity_word2vec, MODELS
+import fasttext
 
 def main(args):
+    print(args.device + '\n')
+    print(type(args.device))
     logger = logging.getLogger()
     if args.train:
         logger.info('Start preprocessing')
         tokenized_files = preprocess_dataset(args)
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
-        training_word2vec(args, tokenized_files)
+
+        if args.modelType == 'word':
+            training_word2vec(args, tokenized_files)
+        elif args.modelType == 'fasttext':
+            training_fasttext(args, tokenized_files)
+
     if args.test_similarity:
         test_similarity_word2vec(args)
     if args.evaluation_metamodel_classification:
@@ -78,13 +85,14 @@ def print_command_and_args():
         config_table.add_row([config, str(value)])
     logger.info('Configuration:\n{}'.format(config_table))
 
-
 if __name__ == '__main__':
     parser = ArgumentParser(description='Script for w2v w2v')
     parser.add_argument('--training_dataset', default='./docs',
                         help='Path to the w2v dataset')
     parser.add_argument('--training_dataset_concepts', default='./java/parser/out',
                         help='Path to the concepts modelset dataset')
+    parser.add_argument('--modelType', default='fasttext',
+                        help='Model to train the tokenizer. word or fasttext')
     parser.add_argument('--embeddings_out', default='./out',
                         help='root folder of the embeddings')
     parser.add_argument('--folder_out_embeddings', default='skip_gram_modelling',

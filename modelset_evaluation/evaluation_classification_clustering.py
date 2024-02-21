@@ -157,6 +157,8 @@ def evaluation_metamodel_classification(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
+        if m!='so_word2vec':
+            continue
         w2v_model = load_model(m, args.embeddings_out)
         X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
         # X_models[m] = X_models[m] / np.linalg.norm(X_models[m], axis=1, ord=2)[:, np.newaxis]
@@ -167,6 +169,8 @@ def evaluation_metamodel_classification(args):
     for train_index, test_index in tqdm(skf.split(corpus, labels),
                                         desc='Iteration over folds', total=args.folds):
         for m in MODELS:
+            if m!='so_word2vec':
+                continue
             X = X_models[m]
             X_train, X_val = X[train_index], X[test_index]
             y_train, y_val = np.array(labels)[train_index], np.array(labels)[test_index]
@@ -180,6 +184,8 @@ def evaluation_metamodel_classification(args):
 
     logger.info('------Best hyperparameters------')
     for m in MODELS:
+        if m!='so_word2vec':
+            continue
         logger.info(f'B. Accuracy for {m}: {best_hyperparams(scores[m])}')
 
     scores = {x: scores[x][best_hyperparams(scores[x])] for x in MODELS}
@@ -187,14 +193,17 @@ def evaluation_metamodel_classification(args):
 
     logger.info('------Results------')
     for m in MODELS:
+        if m!='so_word2vec':
+            continue
         logger.info(f'B. Accuracy for {m}: {results[m]}')
+    return
     logger.info('------Tests with adjustment------')
-    logger.info(stats.friedmanchisquare(*[scores[m] for m in MODELS]))
+    logger.info(stats.friedmanchisquare(*[scores[m] for m in MODELS if m == "so_word2vec"] ))
     p_adjust = 'bonferroni'
-    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS], p_adjust=p_adjust)}')
+    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec"], p_adjust=p_adjust)}')
 
     logger.info('------Tests without adjustment------')
-    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS], p_adjust=None)}')
+    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec"], p_adjust=None)}')
 
 
 def evaluation_metamodel_clustering(args):
@@ -208,11 +217,15 @@ def evaluation_metamodel_clustering(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
+        if m!='so_word2vec':
+            continue
         w2v_model = load_model(m, args.embeddings_out)
         X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
 
     results = defaultdict(list)
     for m in tqdm(MODELS, desc='Iteration over word embeddings'):
+        if m!='so_word2vec':
+            continue
         for i in range(1, 11):
             model = KMeans(random_state=args.seed + i, verbose=False, n_clusters=len(np.unique(labels)))
             model.fit(X_models[m])
@@ -221,8 +234,11 @@ def evaluation_metamodel_clustering(args):
 
     logger.info('------Results------')
     for m in MODELS:
+        if m!='so_word2vec':
+            continue
         logger.info(f'V-measure for {m}: {np.mean(results[m])}')
     logger.info('------Tests------')
+    return
     logger.info(stats.friedmanchisquare(*[results[m] for m in MODELS]))
     p_adjust = 'bonferroni'
     logger.info(f'\n{posthoc_wilcoxon([results[m] for m in MODELS], p_adjust=p_adjust)}')
