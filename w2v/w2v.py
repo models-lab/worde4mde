@@ -18,7 +18,9 @@ MODELS = [
     'glove-mde',
     'word2vec-google-news-300',
     'fasttext',
-    'so_word2vec'
+    'so_word2vec',
+    'average',
+    'average_sgramglove'
         ]
 
 PATHS = {
@@ -26,7 +28,9 @@ PATHS = {
     'cbow-mde': 'out/cbow_modelling/cbow_vectors.kv',
     'glove-mde': 'out/glove_modelling/vectors.txt',
     'fasttext': 'embeddings/fasttext/skip_gram_vectors.kv',
-    'so_word2vec': 'embeddings/so_word2vec/SO_vectors_200.bin'
+    'so_word2vec': 'embeddings/so_word2vec/SO_vectors_200.bin',
+    'average': 'embeddings/average_gloves/average_gloves.txt',
+    'average_sgramglove': 'embeddings/average_sgramglove/average_gloves.txt'
 }
 
 
@@ -84,7 +88,9 @@ def load_model(model, embeddings_out=None):
     elif model == 'so_word2vec':
         reloaded_word_vectors = KeyedVectors.load_word2vec_format(PATHS[model], binary=True)
     elif model == 'average':
-        reloaded_word_vectors = "a"
+        reloaded_word_vectors = KeyedVectors.load(PATHS[model])
+    elif model == 'average_sgramglove':
+        reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     else:
         reloaded_word_vectors = api.load(model)
     return reloaded_word_vectors

@@ -16,8 +16,6 @@ from w2v.w2v import training_word2vec, training_fasttext, test_similarity_word2v
 import fasttext
 
 def main(args):
-    print(args.device + '\n')
-    print(type(args.device))
     logger = logging.getLogger()
     if args.train:
         logger.info('Start preprocessing')

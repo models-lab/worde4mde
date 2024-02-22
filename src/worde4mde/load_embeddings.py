@@ -13,11 +13,9 @@ URL = 'https://drive.google.com/uc?id=13wkOuD1Is5rzDxRzCcfDd42rrzaMtowB'
 SGRAM_MDE_PATH = os.path.join('out', 'skip_gram_modelling', 'skip_gram_vectors.kv')
 GLOVE_MDE_PATH = os.path.join('out', 'glove_modelling', 'vectors.txt')
 
-
 def clear_cache():
     if os.path.exists(CACHE_PATH):
         shutil.rmtree(CACHE_PATH)
-
 
 def download_embeddings():
     os.makedirs(os.path.join(CACHE_PATH, EMBEDDINGS_FOLDER), exist_ok=True)

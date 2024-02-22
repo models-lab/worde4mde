@@ -96,7 +96,7 @@ def preprocess_dataset_metamodel_concepts(args):
 
     models = []
     for m in MODELS:
-        if m != 'so_word2vec':
+        if m != 'so_word2vec' and m != 'fasttext' and m!= 'skip_gram-mde':
             continue
         w2v_model = load_model(m, args.embeddings_out)
         models.append(w2v_model)
@@ -106,4 +106,3 @@ def preprocess_dataset_metamodel_concepts(args):
     modelset_df, _ = set_up_modelset(args)
     result = [item for item in result if item["id"] in list(modelset_df['id'])]
     return result
-

@@ -78,7 +78,7 @@ def evaluation_concepts(args, items):
     # load all models
     models = []
     for m in MODELS:
-        if m != 'so_word2vec':
+        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
             continue
         w2v_model = load_model(m, args.embeddings_out)
         models.append(w2v_model)

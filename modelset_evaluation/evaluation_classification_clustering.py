@@ -157,7 +157,7 @@ def evaluation_metamodel_classification(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
-        if m!='so_word2vec':
+        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
             continue
         w2v_model = load_model(m, args.embeddings_out)
         X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
@@ -169,7 +169,7 @@ def evaluation_metamodel_classification(args):
     for train_index, test_index in tqdm(skf.split(corpus, labels),
                                         desc='Iteration over folds', total=args.folds):
         for m in MODELS:
-            if m!='so_word2vec':
+            if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
                 continue
             X = X_models[m]
             X_train, X_val = X[train_index], X[test_index]
@@ -184,7 +184,7 @@ def evaluation_metamodel_classification(args):
 
     logger.info('------Best hyperparameters------')
     for m in MODELS:
-        if m!='so_word2vec':
+        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
             continue
         logger.info(f'B. Accuracy for {m}: {best_hyperparams(scores[m])}')
 
@@ -193,17 +193,16 @@ def evaluation_metamodel_classification(args):
 
     logger.info('------Results------')
     for m in MODELS:
-        if m!='so_word2vec':
+        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
             continue
         logger.info(f'B. Accuracy for {m}: {results[m]}')
-    return
     logger.info('------Tests with adjustment------')
-    logger.info(stats.friedmanchisquare(*[scores[m] for m in MODELS if m == "so_word2vec"] ))
+    logger.info(stats.friedmanchisquare(*[scores[m] for m in MODELS if m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m=="average" or m == "average_sgramglove"] ))
     p_adjust = 'bonferroni'
-    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec"], p_adjust=p_adjust)}')
+    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m=="average" or m == "average_sgramglove"], p_adjust=p_adjust)}')
 
     logger.info('------Tests without adjustment------')
-    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec"], p_adjust=None)}')
+    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m=="average" or m == "average_sgramglove"], p_adjust=None)}')
 
 
 def evaluation_metamodel_clustering(args):
@@ -217,14 +216,14 @@ def evaluation_metamodel_clustering(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
-        if m!='so_word2vec':
+        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
             continue
         w2v_model = load_model(m, args.embeddings_out)
         X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
 
     results = defaultdict(list)
     for m in tqdm(MODELS, desc='Iteration over word embeddings'):
-        if m!='so_word2vec':
+        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
             continue
         for i in range(1, 11):
             model = KMeans(random_state=args.seed + i, verbose=False, n_clusters=len(np.unique(labels)))
@@ -234,7 +233,7 @@ def evaluation_metamodel_clustering(args):
 
     logger.info('------Results------')
     for m in MODELS:
-        if m!='so_word2vec':
+        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
             continue
         logger.info(f'V-measure for {m}: {np.mean(results[m])}')
     logger.info('------Tests------')
