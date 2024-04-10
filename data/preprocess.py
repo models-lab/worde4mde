@@ -3,10 +3,11 @@ import json
 import logging
 import re
 import fasttext
-
+import os
 import pdftotext
 from nltk.tokenize import word_tokenize, sent_tokenize
 from tqdm import tqdm
+import xml.etree.ElementTree as ET
 
 from modelset_evaluation.evaluation_classification_clustering import set_up_modelset
 from w2v.w2v import MODELS, load_model
@@ -44,7 +45,6 @@ def preprocess_doc(string):
 
     # split in sentences
     sentences = [preprocess_sentence(s) for s in sent_tokenize(string)]
-
     # remove short sentences
     return [s for s in sentences if len(s) > 5]
 
@@ -58,10 +58,80 @@ def preprocess_dataset(args):
             logging.getLogger().info(f'Error in file {f}')
             continue
         tokens = preprocess_doc(content)
-        #print(tokens)
         result += tokens
+
     return result
 
+def preprocess_sodump(args):
+    with open("./selection.txt", 'r') as file:
+        # Que categorias quiero
+        lines = [l.strip() for l in file.readlines()]
+        #print(lines)
+        # Directorio donde estan todas las categorias
+        directories = [d for d in os.listdir('/data2/sodump/all') if
+                       os.path.isdir(os.path.join('/data2/sodump/all', d))]
+        # Quiero su interseccion
+        common_elements = set(lines) & set(directories)
+        # Por cada directorio deseado me quedo con Posts y Comments
+        dataset = []
+        for element in common_elements:
+            print("Preprocessing " + element)
+            postpath = '/data2/sodump/all/' + element + '/Posts.xml'
+            commentpath = '/data2/sodump/all/' + element + '/Comments.xml'
+            posthistorypath = '/data2/sodump/all/' + element + '/PostHistory.xml'
+            # Abro Posts
+            with open(postpath, 'r') as posts:
+                # Leo las lineas de Posts.
+                tree = ET.parse(posts)
+                root = tree.getroot()
+                campos_body = []
+                for e in root.findall(".//row"):
+                    body = e.get("Body")
+                    if body is None:
+                        raise ValueError(str(e))
+                    campos_body.append(body)
+            with open(commentpath, 'r') as comments:
+                # Leo las lineas de Comments.
+                tree = ET.parse(comments)
+                root = tree.getroot()
+                campos_text = []
+                for e in root.findall(".//row"):
+                    text = e.get("Text")
+                    if text is None:
+                        raise ValueError(str(e))
+                    campos_text.append(text)
+            #with open(posthistorypath, 'r') as comments:
+            #    # Leo las lineas de PostHistory.
+            #    tree = ET.parse(comments)
+            #    root = tree.getroot()
+            #    campos_text2 = []
+            #    for e in root.findall(".//row"):
+            #        text = e.get("Text")
+            #        if text is None:
+            #            print(ET.tostring(e))
+            #            raise ValueError(str(e))
+
+            #        campos_text2.append(text)
+
+
+            dataset += campos_body + campos_text
+
+
+    # Dataset contiene todo.
+    tokenized_files = []
+    print("LONGITUD DATASET")
+    print(len(dataset))
+    cnt = 0
+    for content in dataset:
+        # Eliminar tags.
+        cnt += 1
+        if cnt % 1000 == 0:
+            print(cnt)
+            print(content)
+        tokens = preprocess_doc(content)
+
+        tokenized_files += tokens
+    return tokenized_files
 
 def load_data_metamodel_concepts(file_name):
     with open(file_name, "rb") as f:

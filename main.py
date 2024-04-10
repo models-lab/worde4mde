@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from prettytable import PrettyTable
 
-from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_concepts
+from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_concepts, preprocess_sodump
 from modelset_evaluation.evaluation_classification_clustering import evaluation_metamodel_classification, \
     evaluation_metamodel_clustering
 from modelset_evaluation.evaluation_metamodel_concepts import evaluation_concepts, example_recommendation
@@ -26,7 +26,13 @@ def main(args):
             training_word2vec(args, tokenized_files)
         elif args.modelType == 'fasttext':
             training_fasttext(args, tokenized_files)
-
+    if args.train_sodump:
+        logger.info('Start preprocessing')
+        tokenized_files = preprocess_sodump(args)
+        logger.info(f'END PREPROC')
+        logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
+        training_word2vec(args, tokenized_files)
+    if args.train
     if args.test_similarity:
         test_similarity_word2vec(args)
     if args.evaluation_metamodel_classification:
@@ -107,6 +113,7 @@ if __name__ == '__main__':
                         help='ecore or uml',
                         choices=['ecore', 'uml'])
     parser.add_argument('--train', help='Train w2v', action='store_true')
+    parser.add_argument('--train_sodump', help='Train w2v', action='store_true')
     parser.add_argument('--test_similarity', help='Test similarity w2v', action='store_true')
     parser.add_argument('--evaluation_metamodel_classification', help='Evaluate embeddings in metamodel classification',
                         action='store_true')
