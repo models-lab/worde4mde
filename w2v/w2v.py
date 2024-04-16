@@ -5,6 +5,8 @@ import gensim.downloader as api
 from gensim.models import Word2Vec, FastText, KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
 from gensim.test.utils import get_tmpfile
+from gensim.models.fasttext import save_facebook_model, load_facebook_model
+import fasttext
 
 logger = logging.getLogger()
 
@@ -20,7 +22,10 @@ MODELS = [
     'fasttext',
     'so_word2vec',
     'average',
-    'average_sgramglove'
+    'average_sgramglove',
+    'sodump',
+    'all',
+    'fasttext_bin'
         ]
 
 PATHS = {
@@ -30,9 +35,11 @@ PATHS = {
     'fasttext': 'embeddings/fasttext/skip_gram_vectors.kv',
     'so_word2vec': 'embeddings/so_word2vec/SO_vectors_200.bin',
     'average': 'embeddings/average_gloves/average_gloves.txt',
-    'average_sgramglove': 'embeddings/average_sgramglove/average_gloves.txt'
+    'average_sgramglove': 'embeddings/average_sgramglove/average_gloves.txt',
+    'sodump': 'out/skip_gram_sodump/skip_gram_vectors.kv',
+    'fasttext_bin': 'out/fasttext_bin/fasttext_model.bin',
+    'all': 'out/skip_gram_all/skip_gram_vectors.kv'
 }
-
 
 def training_word2vec(args, sentences):
     if args.w2v_algorithm == 'skip_gram':
@@ -70,7 +77,9 @@ def training_fasttext(args, sentences):
     output_folder = os.path.join(args.embeddings_out, args.folder_out_embeddings)
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-    model.wv.save(os.path.join(output_folder, vectors_name))
+    #model.wv.save(os.path.join(output_folder, vectors_name))
+    save_facebook_model(model, os.path.join(output_folder, 'fasttext_model.bin'))
+
 
 
 def load_model(model, embeddings_out=None):
@@ -90,6 +99,14 @@ def load_model(model, embeddings_out=None):
     elif model == 'average':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'average_sgramglove':
+        reloaded_word_vectors = KeyedVectors.load(PATHS[model])
+    elif model == 'sodump':
+        reloaded_word_vectors = KeyedVectors.load(PATHS[model])
+    elif model == 'fasttext_bin':
+        #reloaded_word_vectors = load_facebook_model(PATHS[model])
+        reloaded_word_vectors = fasttext.load_model(PATHS[model])
+        #reloaded_word_vectors = KeyedVectors.load_word2vec_format(PATHS[model], binary=True)
+    elif model == 'all':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     else:
         reloaded_word_vectors = api.load(model)

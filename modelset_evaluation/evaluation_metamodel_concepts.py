@@ -61,10 +61,13 @@ def batch_indices_to_zeros(indices, model):
     return torch.tensor(list_zeros)
 
 
-def items_to_keys(item, model):
+def items_to_keys(item, model, m):
     indices = []
     for r in item["recommendations"]:
-        indices.append(model.key_to_index[r])
+        if "fasttext" in m:
+            indices.append(model.get_index(r))
+        else:
+            indices.append(model.key_to_index[r])
     item_new = {"context": model.key_to_index[item["context"]],
                 "recommendations_indices": indices,
                 "context_type": KEYS_CONTEXT_TYPE[item["context_type"]]}
@@ -78,23 +81,21 @@ def evaluation_concepts(args, items):
     # load all models
     models = []
     for m in MODELS:
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove':
+        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
             continue
         w2v_model = load_model(m, args.embeddings_out)
-        models.append(w2v_model)
+        models.append((w2v_model, m))
 
     results_recalls = {}
-    for model_name_id, w2v_model in enumerate(models):
-        keyed_items = [items_to_keys(item, w2v_model) for item in items]
-
+    for model_name_id, (w2v_model, m) in enumerate(models):
+        print(m)
+        keyed_items = [items_to_keys(item, w2v_model, m) for item in items]
         train, test = train_test_split(keyed_items, test_size=0.3, random_state=args.seed)
         train_data_loader = DataLoader(dataset=train,
                                        batch_size=32,
                                        shuffle=True,
                                        collate_fn=collate_fn,
                                        num_workers=0)
-        print(args.device + '\n')
-        print(type(args.device))
         recommender_model = RecommenderModel(np.array(w2v_model.vectors), args.device).to(args.device)
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, recommender_model.parameters()), lr=0.001)
         criterion = nn.BCELoss(reduction='none')

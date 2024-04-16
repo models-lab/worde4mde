@@ -63,7 +63,7 @@ def preprocess_dataset(args):
     return result
 
 def preprocess_sodump(args):
-    with open("./selection.txt", 'r') as file:
+    with open("./selection_all.txt", 'r') as file:
         # Que categorias quiero
         lines = [l.strip() for l in file.readlines()]
         #print(lines)
@@ -125,9 +125,8 @@ def preprocess_sodump(args):
     for content in dataset:
         # Eliminar tags.
         cnt += 1
-        if cnt % 1000 == 0:
+        if cnt % 100000 == 0:
             print(cnt)
-            print(content)
         tokens = preprocess_doc(content)
 
         tokenized_files += tokens
@@ -166,7 +165,7 @@ def preprocess_dataset_metamodel_concepts(args):
 
     models = []
     for m in MODELS:
-        if m != 'so_word2vec' and m != 'fasttext' and m!= 'skip_gram-mde':
+        if m != 'so_word2vec' and m != 'fasttext' and m!= 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
             continue
         w2v_model = load_model(m, args.embeddings_out)
         models.append(w2v_model)

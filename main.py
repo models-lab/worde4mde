@@ -21,7 +21,6 @@ def main(args):
         logger.info('Start preprocessing')
         tokenized_files = preprocess_dataset(args)
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
-
         if args.modelType == 'word':
             training_word2vec(args, tokenized_files)
         elif args.modelType == 'fasttext':
@@ -29,10 +28,23 @@ def main(args):
     if args.train_sodump:
         logger.info('Start preprocessing')
         tokenized_files = preprocess_sodump(args)
-        logger.info(f'END PREPROC')
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
         training_word2vec(args, tokenized_files)
-    if args.train
+        if args.modelType == 'word':
+            training_word2vec(args, tokenized_all)
+        elif args.modelType == 'fasttext':
+            training_fasttext(args, tokenized_all)
+    if args.train_all:
+        logger.info('Start preprocessing')
+        tokenized_files2 = preprocess_dataset(args)
+        tokenized_files = preprocess_sodump(args)
+        logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
+        tokenized_all = tokenized_files + tokenized_files2
+        random.shuffle(tokenized_all)
+        if args.modelType == 'word':
+            training_word2vec(args, tokenized_all)
+        elif args.modelType == 'fasttext':
+            training_fasttext(args, tokenized_all)
     if args.test_similarity:
         test_similarity_word2vec(args)
     if args.evaluation_metamodel_classification:
@@ -114,6 +126,7 @@ if __name__ == '__main__':
                         choices=['ecore', 'uml'])
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--train_sodump', help='Train w2v', action='store_true')
+    parser.add_argument('--train_all', help='Train w2v', action='store_true')
     parser.add_argument('--test_similarity', help='Test similarity w2v', action='store_true')
     parser.add_argument('--evaluation_metamodel_classification', help='Evaluate embeddings in metamodel classification',
                         action='store_true')
