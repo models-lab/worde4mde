@@ -66,7 +66,13 @@ python main.py --test_similarity --model skip_gram-mde
 python main.py --test_similarity --model glove-wiki-gigaword-300
 python main.py --test_similarity --model word2vec-google-news-300
 ```
+## Training of a model
+Train a model using skip_gram technique. --folder_out_embeddings specifies the route where the model will be stored and
+--training_dataset is the route of the training dataset. --modelType can be "word" or "fasttext" to train using one of
+those techniques.
+python main.py --train --w2v_algorithm skip_gram --folder_out_embeddings sodump_all_modelling --training_dataset /data2/worde4mde/corpus/modelling --modelType fasttext
 
+Change --train to --train_sodump or --train_all if you want to train with the sodump or with sodump + another dataset.
 ## Using the embeddings for meta-model classification, clustering and recommendation 📋
 
 Meta-model classification task:

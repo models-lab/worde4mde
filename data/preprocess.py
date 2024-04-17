@@ -139,7 +139,9 @@ def load_data_metamodel_concepts(file_name):
 
 
 def inside_vocabs(word, models):
-    for model in models:
+    for (model, m) in models:
+        if "fasttext" in m:
+            continue
         if word not in model.key_to_index:
             return False
     return True
@@ -154,7 +156,6 @@ def normalize_item(item, models):
                                    if inside_vocabs(r.lower(), models)]
     return item_new
 
-
 def preprocess_dataset_metamodel_concepts(args):
     files = glob.glob(args.training_dataset_concepts + "/**/*.json", recursive=True)
     files.sort()  # ensure reproducibility
@@ -165,10 +166,8 @@ def preprocess_dataset_metamodel_concepts(args):
 
     models = []
     for m in MODELS:
-        if m != 'so_word2vec' and m != 'fasttext' and m!= 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
-            continue
         w2v_model = load_model(m, args.embeddings_out)
-        models.append(w2v_model)
+        models.append((w2v_model, m))
     result = [normalize_item(item, models) for item in result]
     result = [item for item in result if item["context"] is not None and item["recommendations"] != []]
     result = [item for item in result if item["context_type"] == args.context_type]

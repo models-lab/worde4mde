@@ -15,30 +15,34 @@ GLOVE_VECTORS_NAME = 'vectors.txt'
 SKIP_GRAM_VECTORS = 'skip_gram_vectors.kv'
 CBOW_VECTORS = 'cbow_vectors.kv'
 MODELS = [
-    'glove-wiki-gigaword-300',
+##    'glove-wiki-gigaword-300',
     'skip_gram-mde',
     'glove-mde',
-    'word2vec-google-news-300',
-    'fasttext',
-    'so_word2vec',
-    'average',
-    'average_sgramglove',
-    'sodump',
-    'all',
-    'fasttext_bin'
+##    'word2vec-google-news-300',
+#    'fasttext-mde',
+#    'so_word2vec',
+    'sgram-sodump',
+#    'fasttext-sodump',
+##    'sgram-all',
+#    'fasttext-all',
+#    'fasttext_bin',
+#    'average',
+#    'average_sgramglove'
         ]
 
 PATHS = {
     'skip_gram-mde': 'out/skip_gram_modelling/skip_gram_vectors.kv',
     'cbow-mde': 'out/cbow_modelling/cbow_vectors.kv',
     'glove-mde': 'out/glove_modelling/vectors.txt',
-    'fasttext': 'embeddings/fasttext/skip_gram_vectors.kv',
+    'fasttext-mde': 'embeddings/fasttext-mde/skip_gram_vectors.kv',
     'so_word2vec': 'embeddings/so_word2vec/SO_vectors_200.bin',
     'average': 'embeddings/average_gloves/average_gloves.txt',
     'average_sgramglove': 'embeddings/average_sgramglove/average_gloves.txt',
-    'sodump': 'out/skip_gram_sodump/skip_gram_vectors.kv',
+    'sgram-sodump': 'out/skip_gram_sodump/skip_gram_vectors.kv',
+    'fasttext-sodump': 'out/COMPLETE',
     'fasttext_bin': 'out/fasttext_bin/fasttext_model.bin',
-    'all': 'out/skip_gram_all/skip_gram_vectors.kv'
+    'sgram-all': 'out/skip_gram_all/skip_gram_vectors.kv',
+    'fasttext-all': 'out/skip_gram_sodump_all_modelling/sodump_all_modelling.kv'
 }
 
 def training_word2vec(args, sentences):
@@ -80,9 +84,11 @@ def training_fasttext(args, sentences):
     #model.wv.save(os.path.join(output_folder, vectors_name))
     save_facebook_model(model, os.path.join(output_folder, 'fasttext_model.bin'))
 
-
-
 def load_model(model, embeddings_out=None):
+    print(model)
+    #    'fasttext-sodump',
+    #    'fasttext-all',
+
     if model == 'skip_gram-mde':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'cbow-mde':
@@ -92,7 +98,7 @@ def load_model(model, embeddings_out=None):
         tmp_file = get_tmpfile("test_word2vec.txt")
         _ = glove2word2vec(glove_file, tmp_file)
         reloaded_word_vectors = KeyedVectors.load_word2vec_format(tmp_file)
-    elif model == 'fasttext':
+    elif model == 'fasttext-mde':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'so_word2vec':
         reloaded_word_vectors = KeyedVectors.load_word2vec_format(PATHS[model], binary=True)
@@ -100,18 +106,17 @@ def load_model(model, embeddings_out=None):
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'average_sgramglove':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
-    elif model == 'sodump':
+    elif model == 'sgram-sodump':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'fasttext_bin':
         #reloaded_word_vectors = load_facebook_model(PATHS[model])
         reloaded_word_vectors = fasttext.load_model(PATHS[model])
         #reloaded_word_vectors = KeyedVectors.load_word2vec_format(PATHS[model], binary=True)
-    elif model == 'all':
+    elif model == 'sgram-all':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     else:
         reloaded_word_vectors = api.load(model)
     return reloaded_word_vectors
-
 
 def test_similarity_word2vec(args):
     reloaded_word_vectors = load_model(args.model, args.embeddings_out)

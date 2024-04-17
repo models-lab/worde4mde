@@ -65,7 +65,8 @@ def items_to_keys(item, model, m):
     indices = []
     for r in item["recommendations"]:
         if "fasttext" in m:
-            indices.append(model.get_index(r))
+            #indices.append(model.get_index(r))
+            indices.append(model[r])
         else:
             indices.append(model.key_to_index[r])
     item_new = {"context": model.key_to_index[item["context"]],
@@ -81,8 +82,6 @@ def evaluation_concepts(args, items):
     # load all models
     models = []
     for m in MODELS:
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
-            continue
         w2v_model = load_model(m, args.embeddings_out)
         models.append((w2v_model, m))
 
