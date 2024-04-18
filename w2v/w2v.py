@@ -16,16 +16,16 @@ SKIP_GRAM_VECTORS = 'skip_gram_vectors.kv'
 CBOW_VECTORS = 'cbow_vectors.kv'
 MODELS = [
 ##    'glove-wiki-gigaword-300',
-    'skip_gram-mde',
-    'glove-mde',
+#    'skip_gram-mde',
+#    'glove-mde',
 ##    'word2vec-google-news-300',
-#    'fasttext-mde',
+    'fasttext-mde',
 #    'so_word2vec',
-    'sgram-sodump',
+#    'sgram-sodump',
 #    'fasttext-sodump',
 ##    'sgram-all',
 #    'fasttext-all',
-#    'fasttext_bin',
+    'fasttext_bin',
 #    'average',
 #    'average_sgramglove'
         ]
@@ -109,8 +109,8 @@ def load_model(model, embeddings_out=None):
     elif model == 'sgram-sodump':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'fasttext_bin':
-        #reloaded_word_vectors = load_facebook_model(PATHS[model])
-        reloaded_word_vectors = fasttext.load_model(PATHS[model])
+        reloaded_word_vectors = load_facebook_model(PATHS[model])
+        #reloaded_word_vectors = fasttext.load_model(PATHS[model])
         #reloaded_word_vectors = KeyedVectors.load_word2vec_format(PATHS[model], binary=True)
     elif model == 'sgram-all':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])

@@ -140,12 +140,13 @@ def load_data_metamodel_concepts(file_name):
 
 def inside_vocabs(word, models):
     for (model, m) in models:
-        if "fasttext" in m:
-            continue
-        if word not in model.key_to_index:
-            return False
+        if m == 'fasttext_bin':
+            if word not in model.wv.key_to_index:
+                return False
+        else:
+            if word not in model.key_to_index:
+                return False
     return True
-
 
 def normalize_item(item, models):
     item_new = {"context": item["context"].lower(), "context_type": item["contextType"], "id": item["id"]}

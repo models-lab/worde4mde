@@ -23,7 +23,7 @@ def main(args):
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
         if args.modelType == 'word':
             training_word2vec(args, tokenized_files)
-        elif args.modelType == 'fasttext-mde':
+        elif args.modelType == 'fasttext':
             training_fasttext(args, tokenized_files)
     if args.train_sodump:
         logger.info('Start preprocessing')
@@ -32,19 +32,18 @@ def main(args):
         training_word2vec(args, tokenized_files)
         if args.modelType == 'word':
             training_word2vec(args, tokenized_files)
-        elif args.modelType == 'fasttext-mde':
+        elif args.modelType == 'fasttext':
             training_fasttext(args, tokenized_files)
     if args.train_all:
         logger.info('Start preprocessing')
         tokenized_files = preprocess_sodump(args)
-        #tokenized_files2 = preprocess_dataset(args)
-
+        tokenized_files2 = preprocess_dataset(args)
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
-        tokenized_all = tokenized_files
+        tokenized_all = tokenized_files + tokenized_files2
         random.shuffle(tokenized_all)
         if args.modelType == 'word':
             training_word2vec(args, tokenized_all)
-        elif args.modelType == 'fasttext-mde':
+        elif args.modelType == 'fasttext':
             training_fasttext(args, tokenized_all)
     if args.test_similarity:
         test_similarity_word2vec(args)
@@ -108,7 +107,7 @@ if __name__ == '__main__':
                         help='Path to the w2v dataset')
     parser.add_argument('--training_dataset_concepts', default='./java/parser/out',
                         help='Path to the concepts modelset dataset')
-    parser.add_argument('--modelType', default='fasttext-mde',
+    parser.add_argument('--modelType', default='fasttext',
                         help='Model to train the tokenizer. word or fasttext-mde')
     parser.add_argument('--embeddings_out', default='./out',
                         help='root folder of the embeddings')
