@@ -173,3 +173,7 @@ out
 /wordcloud.png
 *.bin
 /tokens_per_venue.pkl
+/modeling_corpus.jsonl
+/embeddings/
+/bert-modeling/
+/roberta-modeling/

@@ -7,6 +7,7 @@ from gensim.scripts.glove2word2vec import glove2word2vec
 from gensim.test.utils import get_tmpfile
 from gensim.models.fasttext import save_facebook_model, load_facebook_model
 import fasttext
+from transformers import AutoModel, AutoTokenizer
 
 logger = logging.getLogger()
 
@@ -16,29 +17,31 @@ SKIP_GRAM_VECTORS = 'skip_gram_vectors.kv'
 CBOW_VECTORS = 'cbow_vectors.kv'
 MODELS = [
     'glove-wiki-gigaword-300',
-    'skip_gram-mde',
+    # 'skip_gram-mde',
     'glove-mde',
     'word2vec-google-news-300',
     'fasttext',
     'so_word2vec',
     'average',
     'average_sgramglove',
-    'sodump',
-    'all',
-    'fasttext_bin'
+    'roberta'
+    # 'sodump',
+    # 'all',
+    # 'fasttext_bin'
         ]
 
 PATHS = {
     'skip_gram-mde': 'out/skip_gram_modelling/skip_gram_vectors.kv',
     'cbow-mde': 'out/cbow_modelling/cbow_vectors.kv',
     'glove-mde': 'out/glove_modelling/vectors.txt',
-    'fasttext': 'embeddings/fasttext/skip_gram_vectors.kv',
+    'fasttext': 'embeddings/fasttext-mde/skip_gram_vectors.kv',
     'so_word2vec': 'embeddings/so_word2vec/SO_vectors_200.bin',
     'average': 'embeddings/average_gloves/average_gloves.txt',
     'average_sgramglove': 'embeddings/average_sgramglove/average_gloves.txt',
     'sodump': 'out/skip_gram_sodump/skip_gram_vectors.kv',
     'fasttext_bin': 'out/fasttext_bin/fasttext_model.bin',
-    'all': 'out/skip_gram_all/skip_gram_vectors.kv'
+    'all': 'out/skip_gram_all/skip_gram_vectors.kv',
+    'roberta': 'bert-modeling/checkpoint-61140'
 }
 
 def training_word2vec(args, sentences):
@@ -108,6 +111,10 @@ def load_model(model, embeddings_out=None):
         #reloaded_word_vectors = KeyedVectors.load_word2vec_format(PATHS[model], binary=True)
     elif model == 'all':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
+    elif model == 'roberta':
+        model = AutoModel.from_pretrained(PATHS[model], output_hidden_states=True)
+        tokenizer = AutoTokenizer.from_pretrained("allenai/scibert_scivocab_uncased")
+        reloaded_word_vectors = (model, tokenizer)
     else:
         reloaded_word_vectors = api.load(model)
     return reloaded_word_vectors

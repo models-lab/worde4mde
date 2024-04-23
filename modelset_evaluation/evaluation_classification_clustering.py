@@ -5,6 +5,7 @@ from collections import defaultdict
 from re import finditer
 
 import numpy as np
+import torch
 from modelset import load
 from scikit_posthocs import posthoc_wilcoxon
 from scipy import stats
@@ -117,6 +118,7 @@ def tokenizer(doc):
     words = [w2.lower() for w1 in words for w2 in camel_case_split(w1) if w2 != '']
     return words
 
+
 def get_features_w2v(doc, model, dim=300):
     words = [w for w in tokenizer(doc) if w in model.key_to_index]
     if len(words) == 0:
@@ -125,14 +127,28 @@ def get_features_w2v(doc, model, dim=300):
     vectors = np.stack([model[w] for w in words])
     return np.mean(vectors, axis=0)
 
+
 def get_features_fasttext(doc, model, dim=300):
-    #words = [w for w in tokenizer(doc) if w in model]
+    # words = [w for w in tokenizer(doc) if w in model]
     words = [w for w in tokenizer(doc)]
     if len(words) == 0:
         logger.info(f'All zeros in a meta-model')
         return np.zeros(dim)
     vectors = np.stack([model[w] for w in words])
     return np.mean(vectors, axis=0)
+
+
+def get_features_roberta(doc, model_tok):
+    model, tokenizer_hf = model_tok
+    model.train()
+    words = [w for w in tokenizer(doc)]
+    words = ' '.join(words)
+
+    inputs = tokenizer_hf([words], max_length=512, truncation=True, return_tensors="pt")
+    with torch.no_grad():
+        embeddings = torch.mean(model(**inputs).last_hidden_state[0], dim=0).detach().numpy()
+        assert embeddings.shape == (768, )
+    return embeddings
 
 
 def get_vocab_modelset(corpus):
@@ -165,10 +181,12 @@ def evaluation_metamodel_classification(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
+        if m != 'so_word2vec' and m != 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all' and m != 'roberta':
             continue
         w2v_model = load_model(m, args.embeddings_out)
-        if m != 'fasttext_bin' and m != 'fasttext':
+        if m == 'roberta':
+            X_models[m] = np.array([get_features_roberta(doc, w2v_model) for doc in corpus])
+        elif m != 'fasttext_bin' and m != 'fasttext':
             X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
         else:
             X_models[m] = np.array([get_features_fasttext(doc, w2v_model) for doc in corpus])
@@ -180,7 +198,7 @@ def evaluation_metamodel_classification(args):
     for train_index, test_index in tqdm(skf.split(corpus, labels),
                                         desc='Iteration over folds', total=args.folds):
         for m in MODELS:
-            if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
+            if m != 'so_word2vec' and m != 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all' and m!= 'roberta':
                 continue
             X = X_models[m]
             X_train, X_val = X[train_index], X[test_index]
@@ -195,7 +213,7 @@ def evaluation_metamodel_classification(args):
 
     logger.info('------Best hyperparameters------')
     for m in MODELS:
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
+        if m != 'so_word2vec' and m != 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all' and m != 'roberta':
             continue
         logger.info(f'B. Accuracy for {m}: {best_hyperparams(scores[m])}')
 
@@ -204,16 +222,19 @@ def evaluation_metamodel_classification(args):
 
     logger.info('------Results------')
     for m in MODELS:
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
+        if m != 'so_word2vec' and m != 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all' and m != 'roberta':
             continue
         logger.info(f'B. Accuracy for {m}: {results[m]}')
     logger.info('------Tests with adjustment------')
-    logger.info(stats.friedmanchisquare(*[scores[m] for m in MODELS if m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m=="average" or m == "average_sgramglove" or m == "sodump" or m == "fasttext_bin" or m == "all"] ))
+    logger.info(stats.friedmanchisquare(*[scores[m] for m in MODELS if
+                                          m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m == "average" or m == "average_sgramglove" or m == "sodump" or m == "fasttext_bin" or m == "all" or m == 'roberta']))
     p_adjust = 'bonferroni'
-    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m=="average" or m == "average_sgramglove" or m == "sodump" or m == "fasttext_bin" or m == "all"], p_adjust=p_adjust)}')
+    logger.info(
+        f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m == "average" or m == "average_sgramglove" or m == "sodump" or m == "fasttext_bin" or m == "all" or m == "roberta"], p_adjust=p_adjust)}')
 
     logger.info('------Tests without adjustment------')
-    logger.info(f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m=="average" or m == "average_sgramglove" or m == "sodump" or m == "fasttext_bin" or m == "all"], p_adjust=None)}')
+    logger.info(
+        f'\n{posthoc_wilcoxon([scores[m] for m in MODELS if m == "so_word2vec" or m == "fasttext" or m == "skip_gram-mde" or m == "average" or m == "average_sgramglove" or m == "sodump" or m == "fasttext_bin" or m == "all" or m == "roberta"], p_adjust=None)}')
 
 
 def evaluation_metamodel_clustering(args):
@@ -227,7 +248,7 @@ def evaluation_metamodel_clustering(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
+        if m != 'so_word2vec' and m != 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
             continue
         w2v_model = load_model(m, args.embeddings_out)
         if m != 'fasttext_bin' and m != 'fasttext':
@@ -236,7 +257,7 @@ def evaluation_metamodel_clustering(args):
             X_models[m] = np.array([get_features_fasttext(doc, w2v_model) for doc in corpus])
     results = defaultdict(list)
     for m in tqdm(MODELS, desc='Iteration over word embeddings'):
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
+        if m != 'so_word2vec' and m != 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
             continue
         for i in range(1, 11):
             model = KMeans(random_state=args.seed + i, verbose=False, n_clusters=len(np.unique(labels)))
@@ -246,7 +267,7 @@ def evaluation_metamodel_clustering(args):
 
     logger.info('------Results------')
     for m in MODELS:
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
+        if m != 'so_word2vec' and m != 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
             continue
         logger.info(f'V-measure for {m}: {np.mean(results[m])}')
     logger.info('------Tests------')
