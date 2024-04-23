@@ -31,13 +31,13 @@ def main(args):
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
         training_word2vec(args, tokenized_files)
         if args.modelType == 'word':
-            training_word2vec(args, tokenized_all)
+            training_word2vec(args, tokenized_files)
         elif args.modelType == 'fasttext':
-            training_fasttext(args, tokenized_all)
+            training_fasttext(args, tokenized_files)
     if args.train_all:
         logger.info('Start preprocessing')
-        tokenized_files2 = preprocess_dataset(args)
         tokenized_files = preprocess_sodump(args)
+        tokenized_files2 = preprocess_dataset(args)
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
         tokenized_all = tokenized_files + tokenized_files2
         random.shuffle(tokenized_all)
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     parser.add_argument('--training_dataset_concepts', default='./java/parser/out',
                         help='Path to the concepts modelset dataset')
     parser.add_argument('--modelType', default='fasttext',
-                        help='Model to train the tokenizer. word or fasttext')
+                        help='Model to train the tokenizer. word or fasttext-mde')
     parser.add_argument('--embeddings_out', default='./out',
                         help='root folder of the embeddings')
     parser.add_argument('--folder_out_embeddings', default='skip_gram_modelling',

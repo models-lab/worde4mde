@@ -49,11 +49,13 @@ def collate_fn(batch):
     recommendations_indices = [r + ([-1] * (len(batch) - len(r))) for r in recommendations_indices]
     return torch.tensor(context_type), torch.tensor(context), torch.tensor(recommendations_indices)
 
-
-def batch_indices_to_zeros(indices, model):
+def batch_indices_to_zeros(indices, model, m):
     list_zeros = []
     for b in indices:
-        zeros = [0] * len(model.key_to_index)
+        if m == 'fasttext_bin':
+            zeros = [0] * len(model.wv.key_to_index)
+        else:
+            zeros = [0] * len(model.key_to_index)
         for i in b:
             if i != -1:
                 zeros[i] = 1
@@ -64,13 +66,21 @@ def batch_indices_to_zeros(indices, model):
 def items_to_keys(item, model, m):
     indices = []
     for r in item["recommendations"]:
-        if "fasttext" in m:
+        if m == 'fasttext_bin':
+            indices.append(model.wv.get_index(r))
+            item_new = {"context": model.wv.get_index(item["context"]),
+                        "recommendations_indices": indices,
+                        "context_type": KEYS_CONTEXT_TYPE[item["context_type"]]}
+        elif m == 'fasttext-mde':
             indices.append(model.get_index(r))
+            item_new = {"context": model.get_index(item["context"]),
+                        "recommendations_indices": indices,
+                        "context_type": KEYS_CONTEXT_TYPE[item["context_type"]]}
         else:
             indices.append(model.key_to_index[r])
-    item_new = {"context": model.key_to_index[item["context"]],
-                "recommendations_indices": indices,
-                "context_type": KEYS_CONTEXT_TYPE[item["context_type"]]}
+            item_new = {"context": model.key_to_index[item["context"]],
+                        "recommendations_indices": indices,
+                        "context_type": KEYS_CONTEXT_TYPE[item["context_type"]]}
     return item_new
 
 
@@ -81,8 +91,6 @@ def evaluation_concepts(args, items):
     # load all models
     models = []
     for m in MODELS:
-        if m!='so_word2vec' and m!= 'fasttext' and m != 'skip_gram-mde' and m != 'average' and m != 'average_sgramglove' and m != 'sodump' and m != 'fasttext_bin' and m != 'all':
-            continue
         w2v_model = load_model(m, args.embeddings_out)
         models.append((w2v_model, m))
 
@@ -96,7 +104,10 @@ def evaluation_concepts(args, items):
                                        shuffle=True,
                                        collate_fn=collate_fn,
                                        num_workers=0)
-        recommender_model = RecommenderModel(np.array(w2v_model.vectors), args.device).to(args.device)
+        if m == 'fasttext_bin':
+            recommender_model = RecommenderModel(np.array(w2v_model.wv.vectors), args.device).to(args.device)
+        else:
+            recommender_model = RecommenderModel(np.array(w2v_model.vectors), args.device).to(args.device)
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, recommender_model.parameters()), lr=0.001)
         criterion = nn.BCELoss(reduction='none')
 
@@ -108,7 +119,7 @@ def evaluation_concepts(args, items):
                                               desc='[training batch]',
                                               bar_format='{desc:<10}{percentage:3.0f}%|{bar:100}{r_bar}')):
                 _, context, recommendations_indices = batch
-                recommendations = batch_indices_to_zeros(recommendations_indices, w2v_model)
+                recommendations = batch_indices_to_zeros(recommendations_indices, w2v_model, m)
                 # output_lsfm: b x V
                 output_lsfm = recommender_model(context.to(args.device))
                 loss = criterion(output_lsfm, recommendations.float().to(args.device))
