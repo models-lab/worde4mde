@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Emfcompare
+Bundle-SymbolicName: ml2.semantic.emfcompare;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: ml2.semantic.emfcompare.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.emf.compare;bundle-version="3.5.3",
+ org.eclipse.emf.compare.edit;bundle-version="4.3.1",
+ org.eclipse.emf.compare.ide;bundle-version="3.4.3",
+ org.eclipse.emf.compare.rcp;bundle-version="2.5.2"
+Automatic-Module-Name: ml2.semantic.emfcompare
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/mar-indexer-embeddings-1.0-SNAPSHOT-jar-with-dependencies.jar,
+ .

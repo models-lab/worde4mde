@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.emf.compare.rcp.matchEngine">
+      <engineFactory
+            class="ml2.semantic.emfcompare.MatchEngineFactory"
+            description="Based on word embeddings"
+            label="Word embedding-based match engine "
+            ranking="50">
+      </engineFactory>
+   </extension>
+
+</plugin>
