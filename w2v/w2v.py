@@ -16,18 +16,25 @@ GLOVE_VECTORS_NAME = 'vectors.txt'
 SKIP_GRAM_VECTORS = 'skip_gram_vectors.kv'
 CBOW_VECTORS = 'cbow_vectors.kv'
 MODELS = [
-    'glove-wiki-gigaword-300',
+    #'glove-wiki-gigaword-300',
     # 'skip_gram-mde',
-    'glove-mde',
-    'word2vec-google-news-300',
-    'fasttext',
-    'so_word2vec',
-    'average',
-    'average_sgramglove',
-    'roberta'
-    # 'sodump',
-    # 'all',
-    # 'fasttext_bin'
+    #'glove-mde',
+    #'word2vec-google-news-300',
+    #'fasttext-mde',
+    #'so_word2vec',
+    #'average',
+    #'average_sgramglove',
+    #'roberta',
+    #'sgram-sodump',
+    #'fasttext-sodump',
+    #'fasttext_bin',
+     #'sgram-all',
+    #'fasttext-all',
+    #'fasttext50',
+    #'fasttext100',
+    'fasttext200',
+    'fasttext400',
+    'fasttext500'
         ]
 
 PATHS = {
@@ -41,10 +48,15 @@ PATHS = {
     'sgram-sodump': 'out/skip_gram_sodump/skip_gram_vectors.kv',
     'fasttext-sodump': 'out/COMPLETE',
     'fasttext_bin': 'out/fasttext_bin/fasttext_model.bin',
-    'all': 'out/skip_gram_all/skip_gram_vectors.kv',
+    'sgram-all': 'out/skip_gram_all/skip_gram_vectors.kv',
     'roberta': 'bert-modeling/checkpoint-61140',
     'sgram-all': 'out/skip_gram_all/skip_gram_vectors.kv',
-    'fasttext-all': 'out/skip_gram_sodump_all_modelling/sodump_all_modelling.kv'
+    'fasttext-all': 'out/sodump_all_modelling/fasttext_model.bin',
+    'fasttext50': 'out/fasttext_modeling_50/fasttext_model.bin',
+    'fasttext100': 'out/fasttext_modeling_100/fasttext_model.bin',
+    'fasttext200': 'out/fasttext_modeling_200/fasttext_model.bin',
+    'fasttext400': 'out/fasttext_modeling_400/fasttext_model.bin',
+    'fasttext500': 'out/fasttext_modeling_500/fasttext_model.bin'
 }
 
 def training_word2vec(args, sentences):
@@ -55,7 +67,7 @@ def training_word2vec(args, sentences):
         sg = 0
         vectors_name = CBOW_VECTORS
 
-    model = Word2Vec(sentences=sentences, vector_size=300,
+    model = Word2Vec(sentences=sentences, vector_size=args.dim_embed,
                      min_count=10, window=10, workers=10, epochs=20,
                      seed=args.seed, compute_loss=True, sg=sg)
     logger.info(f'Vocab size: f{len(model.wv.key_to_index)}')
@@ -75,7 +87,7 @@ def training_fasttext(args, sentences):
         sg = 0
         vectors_name = CBOW_VECTORS
 
-    model = FastText(sentences=sentences, vector_size=300,
+    model = FastText(sentences=sentences, vector_size=args.dim_embed,
                      min_count=10, window=10, workers=10, epochs=20,
                      seed=args.seed, sg=sg)
     logger.info(f'Vocab size: f{len(model.wv.key_to_index)}')
@@ -110,7 +122,7 @@ def load_model(model, embeddings_out=None):
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'sgram-sodump':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
-    elif model == 'fasttext_bin':
+    elif 'fasttext' in model:
         reloaded_word_vectors = load_facebook_model(PATHS[model])
         #reloaded_word_vectors = fasttext.load_model(PATHS[model])
         #reloaded_word_vectors = KeyedVectors.load_word2vec_format(PATHS[model], binary=True)

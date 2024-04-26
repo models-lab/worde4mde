@@ -137,6 +137,14 @@ def get_features_fasttext(doc, model, dim=300):
     vectors = np.stack([model[w] for w in words])
     return np.mean(vectors, axis=0)
 
+def get_features_fasttext_bin(doc, model, dim=300):
+    # words = [w for w in tokenizer(doc) if w in model]
+    words = [w for w in tokenizer(doc)]
+    if len(words) == 0:
+        logger.info(f'All zeros in a meta-model')
+        return np.zeros(dim)
+    vectors = np.stack([model.wv[w] for w in words])
+    return np.mean(vectors, axis=0)
 
 def get_features_roberta(doc, model_tok):
     model, tokenizer_hf = model_tok
@@ -181,13 +189,16 @@ def evaluation_metamodel_classification(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
+        print(m)
         w2v_model = load_model(m, args.embeddings_out)
         if m == 'roberta':
-            X_models[m] = np.array([get_features_roberta(doc, w2v_model) for doc in corpus])
-        if "fasttext" not in m:
-            X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
+            X_models[m] = np.array([get_features_roberta(doc, w2v_model, args.dim_embed) for doc in corpus])
+        elif m == "fasttext-mde":
+            X_models[m] = np.array([get_features_fasttext(doc, w2v_model, args.dim_embed) for doc in corpus])
+        elif "fasttext" in m:
+            X_models[m] = np.array([get_features_fasttext_bin(doc, w2v_model, args.dim_embed) for doc in corpus])
         else:
-            X_models[m] = np.array([get_features_fasttext(doc, w2v_model) for doc in corpus])
+            X_models[m] = np.array([get_features_w2v(doc, w2v_model, args.dim_embed) for doc in corpus])
         # X_models[m] = X_models[m] / np.linalg.norm(X_models[m], axis=1, ord=2)[:, np.newaxis]
 
     # kfold
@@ -238,10 +249,15 @@ def evaluation_metamodel_clustering(args):
     X_models = {}
     for m in MODELS:
         w2v_model = load_model(m, args.embeddings_out)
-        if "fasttext" not in m:
-            X_models[m] = np.array([get_features_w2v(doc, w2v_model) for doc in corpus])
+        print(m)
+        if m == 'roberta':
+            X_models[m] = np.array([get_features_roberta(doc, w2v_model, args.dim_embed) for doc in corpus])
+        elif m == "fasttext-mde":
+            X_models[m] = np.array([get_features_fasttext(doc, w2v_model, args.dim_embed) for doc in corpus])
+        elif "fasttext" in m:
+            X_models[m] = np.array([get_features_fasttext_bin(doc, w2v_model, args.dim_embed) for doc in corpus])
         else:
-            X_models[m] = np.array([get_features_fasttext(doc, w2v_model) for doc in corpus])
+            X_models[m] = np.array([get_features_w2v(doc, w2v_model, args.dim_embed) for doc in corpus])
     results = defaultdict(list)
     for m in tqdm(MODELS, desc='Iteration over word embeddings'):
         for i in range(1, 11):

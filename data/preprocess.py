@@ -63,7 +63,7 @@ def preprocess_dataset(args):
     return result
 
 def preprocess_sodump(args):
-    with open("./selection_all.txt", 'r') as file:
+    with open("./stackoverflow.txt", 'r') as file:
         # Que categorias quiero
         lines = [l.strip() for l in file.readlines()]
         #print(lines)
@@ -80,39 +80,30 @@ def preprocess_sodump(args):
             commentpath = '/data2/sodump/all/' + element + '/Comments.xml'
             posthistorypath = '/data2/sodump/all/' + element + '/PostHistory.xml'
             # Abro Posts
-            with open(postpath, 'r') as posts:
-                # Leo las lineas de Posts.
-                tree = ET.parse(posts)
-                root = tree.getroot()
-                campos_body = []
-                for e in root.findall(".//row"):
-                    body = e.get("Body")
-                    if body is None:
-                        raise ValueError(str(e))
-                    campos_body.append(body)
-            with open(commentpath, 'r') as comments:
-                # Leo las lineas de Comments.
-                tree = ET.parse(comments)
-                root = tree.getroot()
-                campos_text = []
-                for e in root.findall(".//row"):
-                    text = e.get("Text")
-                    if text is None:
-                        raise ValueError(str(e))
-                    campos_text.append(text)
-            #with open(posthistorypath, 'r') as comments:
-            #    # Leo las lineas de PostHistory.
-            #    tree = ET.parse(comments)
-            #    root = tree.getroot()
-            #    campos_text2 = []
-            #    for e in root.findall(".//row"):
-            #        text = e.get("Text")
-            #        if text is None:
-            #            print(ET.tostring(e))
-            #            raise ValueError(str(e))
-
-            #        campos_text2.append(text)
-
+            if "Posts" in element:
+                with open(postpath, 'r') as posts:
+                    # Leo las lineas de Posts.
+                    tree = ET.parse(posts)
+                    root = tree.getroot()
+                    campos_body = []
+                    rows = root.findall(".//row")
+                    for e in tqdm(rows, desc="Processing rows"):
+                        body = e.get("Body")
+                        if body is None:
+                            raise ValueError(str(e))
+                        campos_body.append(body)
+            elif "Comments" in element:
+                with open(commentpath, 'r') as comments:
+                    # Leo las lineas de Comments.
+                    tree = ET.parse(comments)
+                    root = tree.getroot()
+                    campos_text = []
+                    rows = root.findall(".//row")
+                    for e in tqdm(rows, desc="Processing rows"):
+                        text = e.get("Text")
+                        if text is None:
+                            raise ValueError(str(e))
+                        campos_text.append(text)
 
             dataset += campos_body + campos_text
 
@@ -140,7 +131,7 @@ def load_data_metamodel_concepts(file_name):
 
 def inside_vocabs(word, models):
     for (model, m) in models:
-        if m == 'fasttext_bin':
+        if m == 'fasttext_bin' or m == 'fasttext-all':
             if word not in model.wv.key_to_index:
                 return False
         else:

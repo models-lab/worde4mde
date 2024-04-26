@@ -52,7 +52,7 @@ def collate_fn(batch):
 def batch_indices_to_zeros(indices, model, m):
     list_zeros = []
     for b in indices:
-        if m == 'fasttext_bin':
+        if m == 'fasttext_bin' or m == 'fasttext-all':
             zeros = [0] * len(model.wv.key_to_index)
         else:
             zeros = [0] * len(model.key_to_index)
@@ -66,7 +66,7 @@ def batch_indices_to_zeros(indices, model, m):
 def items_to_keys(item, model, m):
     indices = []
     for r in item["recommendations"]:
-        if m == 'fasttext_bin':
+        if m == 'fasttext_bin' or m == 'fasttext-all':
             indices.append(model.wv.get_index(r))
             item_new = {"context": model.wv.get_index(item["context"]),
                         "recommendations_indices": indices,
@@ -104,7 +104,7 @@ def evaluation_concepts(args, items):
                                        shuffle=True,
                                        collate_fn=collate_fn,
                                        num_workers=0)
-        if m == 'fasttext_bin':
+        if m == 'fasttext_bin' or m == 'fasttext-all':
             recommender_model = RecommenderModel(np.array(w2v_model.wv.vectors), args.device).to(args.device)
         else:
             recommender_model = RecommenderModel(np.array(w2v_model.vectors), args.device).to(args.device)

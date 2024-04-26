@@ -108,7 +108,7 @@ if __name__ == '__main__':
     parser.add_argument('--training_dataset_concepts', default='./java/parser/out',
                         help='Path to the concepts modelset dataset')
     parser.add_argument('--modelType', default='fasttext',
-                        help='Model to train the tokenizer. word or fasttext-mde')
+                        help='Model to train the tokenizer. word or fasttext')
     parser.add_argument('--embeddings_out', default='./out',
                         help='root folder of the embeddings')
     parser.add_argument('--folder_out_embeddings', default='skip_gram_modelling',
@@ -124,6 +124,8 @@ if __name__ == '__main__':
     parser.add_argument('--model_type', default='ecore',
                         help='ecore or uml',
                         choices=['ecore', 'uml'])
+    parser.add_argument('--dim_embed', type=int, default=300,
+                        help='Set the size of the embeddings')
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--train_sodump', help='Train w2v', action='store_true')
     parser.add_argument('--train_all', help='Train w2v', action='store_true')
