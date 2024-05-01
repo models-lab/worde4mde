@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Worde4mde
+Bundle-SymbolicName: ml2.worde4mde
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: ML2
+Automatic-Module-Name: ml2.worde4mde
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-ClassPath: lib/mar-indexer-embeddings-1.0-SNAPSHOT-jar-with-dependencies.jar,
+ .
+Export-Package: ml2.worde4mde

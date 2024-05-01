@@ -24,6 +24,9 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import io.github.jbellis.jvector.vector.VectorSimilarityFunction;
 import mar.indexer.embeddings.Embeddable;
 import mar.indexer.embeddings.EmbeddingStrategy;
+import ml2.worde4mde.EmbeddingLoader;
+import ml2.worde4mde.EmbeddingLoader.Corpus;
+import ml2.worde4mde.EmbeddingLoader.EmbeddingModel;
 
 public class MatchEngineFactory extends MatchEngineFactoryImpl {
 	
@@ -52,7 +55,7 @@ public class MatchEngineFactory extends MatchEngineFactoryImpl {
 
 		public EmbeddingDistanceFunction() {
 			try {
-				this.strategy = new EmbeddingStrategy.GloveWordE(new File("/home/jesus/projects/mde-ml/word2vec-mde/vectors/glove_modelling/vectors.txt"));
+				this.strategy = EmbeddingLoader.INSTANCE.load(EmbeddingModel.GLOVE, Corpus.MDE, 300);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -60,6 +63,7 @@ public class MatchEngineFactory extends MatchEngineFactoryImpl {
 
 		@Override
 		public double distance(Comparison inProgress, EObject a, EObject b) {
+			System.out.println("Comparing " + a + " " + b);
 			float[] v1 = getVector(a);
 			float[] v2 = getVector(b);
 			return 1 - VectorSimilarityFunction.DOT_PRODUCT.compare(v1, v2);
