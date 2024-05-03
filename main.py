@@ -126,6 +126,8 @@ if __name__ == '__main__':
                         choices=['ecore', 'uml'])
     parser.add_argument('--dim_embed', type=int, default=300,
                         help='Set the size of the embeddings')
+    parser.add_argument('--sample_size', type=int, default=100,
+                        help='Set the sample percentage')
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--train_sodump', help='Train w2v', action='store_true')
     parser.add_argument('--train_all', help='Train w2v', action='store_true')

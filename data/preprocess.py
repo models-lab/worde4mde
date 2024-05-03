@@ -8,6 +8,7 @@ import pdftotext
 from nltk.tokenize import word_tokenize, sent_tokenize
 from tqdm import tqdm
 import xml.etree.ElementTree as ET
+import random
 
 from modelset_evaluation.evaluation_classification_clustering import set_up_modelset
 from w2v.w2v import MODELS, load_model
@@ -74,37 +75,54 @@ def preprocess_sodump(args):
         common_elements = set(lines) & set(directories)
         # Por cada directorio deseado me quedo con Posts y Comments
         dataset = []
+        clean = re.compile('<.*?>')
+        prob = args.sample_size / 100
         for element in common_elements:
             print("Preprocessing " + element)
             postpath = '/data2/sodump/all/' + element + '/Posts.xml'
             commentpath = '/data2/sodump/all/' + element + '/Comments.xml'
+
             posthistorypath = '/data2/sodump/all/' + element + '/PostHistory.xml'
             # Abro Posts
+            # Events - signify when to yield a result
+            events_ = ('start', 'end')  # Yield on the start and end of a tag
+            events_ns = ('start', 'start-ns', 'end', 'end-ns')  # Yield on start and end of tags and namespaces
+            campos_body = []
+            campos_text = []
             if "Posts" in element:
-                with open(postpath, 'r') as posts:
-                    # Leo las lineas de Posts.
-                    tree = ET.parse(posts)
-                    root = tree.getroot()
-                    campos_body = []
-                    rows = root.findall(".//row")
-                    for e in tqdm(rows, desc="Processing rows"):
+                #with open(postpath, 'r') as posts:
+                # Create an an iterable
+
+                for event, e in ET.iterparse(postpath, events=events_):
+                    if e.tag == "posts":
+                        continue
+                    if event == 'start':
                         body = e.get("Body")
+                        re.sub(clean, '', body)
+                        #print(body)
                         if body is None:
                             raise ValueError(str(e))
-                        campos_body.append(body)
+                        if random.random() < prob:
+                            campos_body.append(body)
+                    if event == 'end':
+                        e.clear()
             elif "Comments" in element:
-                with open(commentpath, 'r') as comments:
-                    # Leo las lineas de Comments.
-                    tree = ET.parse(comments)
-                    root = tree.getroot()
-                    campos_text = []
-                    rows = root.findall(".//row")
-                    for e in tqdm(rows, desc="Processing rows"):
+                for event, e in ET.iterparse(commentpath, events=events_):
+                    if e.tag == "comments":
+                        continue
+                    if event == 'start':
                         text = e.get("Text")
+                        re.sub(clean, '', text)
+                        #print(text)
                         if text is None:
                             raise ValueError(str(e))
-                        campos_text.append(text)
+                        if random.random() < prob:
+                            campos_text.append(text)
+                    if event == 'end':
+                        e.clear()
 
+            #campos_body = random.sample(campos_body, round(len(campos_body) * (args.sample_size / 100)))
+            #campos_text = random.sample(campos_text, round(len(campos_text) * (args.sample_size / 100)))
             dataset += campos_body + campos_text
 
 

@@ -20,21 +20,21 @@ MODELS = [
     # 'skip_gram-mde',
     #'glove-mde',
     #'word2vec-google-news-300',
-    #'fasttext-mde',
+    'fasttext-mde',
     #'so_word2vec',
-    #'average',
-    #'average_sgramglove',
+    'average',
+    'average_sgramglove',
     #'roberta',
-    #'sgram-sodump',
+    'sgram-sodump',
     #'fasttext-sodump',
-    #'fasttext_bin',
-     #'sgram-all',
-    #'fasttext-all',
+    'fasttext_bin',
+     'sgram-all',
+    'fasttext-all',
     #'fasttext50',
     #'fasttext100',
-    'fasttext200',
-    'fasttext400',
-    'fasttext500'
+    #'fasttext200',
+    #'fasttext400',
+    #'fasttext500'
         ]
 
 PATHS = {
