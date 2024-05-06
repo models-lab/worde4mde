@@ -1,5 +1,6 @@
+{% load routes %}
 <div class="form">
-  <form class="input_part" action="/app/similar_words" method="post">
+  <form class="input_part" action="{% similar_words_path %}" method="post">
 
     <!--
     <label for="term">Modeling term:</label>    
