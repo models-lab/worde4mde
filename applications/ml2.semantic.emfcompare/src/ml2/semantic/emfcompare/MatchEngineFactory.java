@@ -1,6 +1,5 @@
 package ml2.semantic.emfcompare;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,12 +20,12 @@ import org.eclipse.emf.compare.match.impl.MatchEngineFactoryImpl;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-import io.github.jbellis.jvector.vector.VectorSimilarityFunction;
-import mar.indexer.embeddings.Embeddable;
-import mar.indexer.embeddings.EmbeddingStrategy;
+import ml2.worde4mde.BagOfWords;
+import ml2.worde4mde.Embedding;
 import ml2.worde4mde.EmbeddingLoader;
 import ml2.worde4mde.EmbeddingLoader.Corpus;
 import ml2.worde4mde.EmbeddingLoader.EmbeddingModel;
+import ml2.worde4mde.VectorUtils;
 
 public class MatchEngineFactory extends MatchEngineFactoryImpl {
 	
@@ -51,7 +50,7 @@ public class MatchEngineFactory extends MatchEngineFactoryImpl {
 	}
 	
 	public static class EmbeddingDistanceFunction extends EditionDistance {
-		private EmbeddingStrategy strategy;
+		private Embedding strategy;
 
 		public EmbeddingDistanceFunction() {
 			try {
@@ -64,9 +63,31 @@ public class MatchEngineFactory extends MatchEngineFactoryImpl {
 		@Override
 		public double distance(Comparison inProgress, EObject a, EObject b) {
 			System.out.println("Comparing " + a + " " + b);
-			float[] v1 = getVector(a);
+			float[] v1 = getVector(a);			
 			float[] v2 = getVector(b);
-			return 1 - VectorSimilarityFunction.DOT_PRODUCT.compare(v1, v2);
+			if (v1 == null || v2 == null) {
+				System.out.println("v1: " + v1 + " - v2: " + v2);
+				System.out.println(v1);
+				System.out.println(v2);
+				return Double.MAX_VALUE;
+			}
+				// return super.distance(inProgress, a, b);
+			
+			float v = 1 - VectorUtils.cosine(v1, v2);
+			
+			//this.uriDistance.setComparison(inProgress);
+//			double maxDist = Math.max(getThresholdAmount(a), getThresholdAmount(b));
+//			double measuredDist = new CountingDiffEngine(maxDist, this.fakeComparison)
+//					.measureDifferences(inProgress, a, b);
+
+			System.out.println("Distance: " + v);
+			if (v > 0.5) {
+				System.out.println("Max!");
+				return Double.MAX_VALUE;
+			}
+			
+			return v;
+
 		}
 
 		@Override
@@ -74,14 +95,65 @@ public class MatchEngineFactory extends MatchEngineFactoryImpl {
 			return super.areIdentic(inProgress, a, b);
 		}
 		
-		
-		@SuppressWarnings("unchecked")
 		public float[] getVector(EObject o) {
-			return this.strategy.toNormalizedVector(new EmbeddedEObject(o));
+			//return this.strategy.toNormalizedVector(new EmbeddedEObject(o));
+			return this.strategy.toVectorOrNull(new EmbeddedEObject(o));
 		}
 	}
-	
-	private static class EmbeddedEObject implements Embeddable {
+
+	public static class EmbeddingDistanceFunctionBagOfWords extends EditionDistance {
+		private Embedding strategy;
+
+		public EmbeddingDistanceFunctionBagOfWords() {
+			try {
+				this.strategy = EmbeddingLoader.INSTANCE.load(EmbeddingModel.GLOVE, Corpus.MDE, 300);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public double distance(Comparison inProgress, EObject a, EObject b) {
+			System.out.println("Comparing " + a + " " + b);
+			float[] v1 = getVector(a);			
+			float[] v2 = getVector(b);
+			if (v1 == null || v2 == null) {
+				System.out.println("v1: " + v1 + " - v2: " + v2);
+				System.out.println(v1);
+				System.out.println(v2);
+				return Double.MAX_VALUE;
+			}
+				// return super.distance(inProgress, a, b);
+			
+			float v = 1 - VectorUtils.cosine(v1, v2);
+			
+			//this.uriDistance.setComparison(inProgress);
+//			double maxDist = Math.max(getThresholdAmount(a), getThresholdAmount(b));
+//			double measuredDist = new CountingDiffEngine(maxDist, this.fakeComparison)
+//					.measureDifferences(inProgress, a, b);
+
+			System.out.println("Distance: " + v);
+			if (v > 0.5) {
+				System.out.println("Max!");
+				return Double.MAX_VALUE;
+			}
+			
+			return v;
+
+		}
+
+		@Override
+		public boolean areIdentic(Comparison inProgress, EObject a, EObject b) {
+			return super.areIdentic(inProgress, a, b);
+		}
+		
+		public float[] getVector(EObject o) {
+			//return this.strategy.toNormalizedVector(new EmbeddedEObject(o));
+			return this.strategy.toVectorOrNull(new EmbeddedEObject(o));
+		}
+	}
+
+	private static class EmbeddedEObject implements BagOfWords {
 
 		private List<String> strings;
 
@@ -106,12 +178,6 @@ public class MatchEngineFactory extends MatchEngineFactoryImpl {
 		
 		}
 		
-		
-		@Override
-		public int getSeqId() {
-			throw new UnsupportedOperationException();
-		}
-
 		@Override
 		public List<? extends String> getWords() {
 			return strings;

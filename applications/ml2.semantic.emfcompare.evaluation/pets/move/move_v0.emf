@@ -1,0 +1,10 @@
+@namespace(
+	uri="http://ml2/semantic/emfcompare/evaluation/move",
+	prefix="move")
+package de;
+
+class DomesticAnimal {
+	attr String[1] nickname;
+	attr String[1] species;	
+}
+

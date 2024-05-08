@@ -1,0 +1,14 @@
+@namespace(
+	uri="http://ml2/semantic/emfcompare/evaluation/move",
+	prefix="move_renamed")
+package de;
+
+package shop {
+
+	class Pet {
+		attr String[1] moniker;
+		attr String[1] species;	
+	}
+	
+}
+

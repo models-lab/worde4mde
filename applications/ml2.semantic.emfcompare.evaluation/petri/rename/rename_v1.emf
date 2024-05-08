@@ -1,0 +1,13 @@
+@namespace(
+	uri="http://ml2/semantic/emfcompare/evaluation/rename",
+	prefix="rename")
+package petrinet;
+
+class PN {
+	attr String[1] name;
+	val Node[*] nodes;	
+}
+
+abstract class Node {
+	attr String[*] name;
+}

@@ -1,6 +1,6 @@
 @namespace(
-	uri="http://ml2/semantic/emfcompare/evaluation/rename_v0",
-	prefix="rename_v0")
+	uri="http://ml2/semantic/emfcompare/evaluation/move",
+	prefix="move")
 package de;
 
 package shop {

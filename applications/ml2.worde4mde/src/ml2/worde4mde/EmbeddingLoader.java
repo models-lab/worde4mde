@@ -14,7 +14,7 @@ public class EmbeddingLoader {
 	public static EmbeddingLoader INSTANCE = new EmbeddingLoader();
 	
 	private Map<String, File> models = new HashMap<>();
-	private Map<String, EmbeddingStrategy> alreadyLoaded = new HashMap<>();
+	private Map<String, Embedding> alreadyLoaded = new HashMap<>();
 	
 	public EmbeddingLoader() {
 		//String fastText_mde = EmbeddingModel.FASTTEXT.name() + "-" + "mde";	
@@ -36,7 +36,7 @@ public class EmbeddingLoader {
 		return model.name() + "-" + corpus.name() + "-" + size;
 	}
 
-	public EmbeddingStrategy load(EmbeddingModel type, Corpus corpus, int size) throws IOException {
+	public Embedding load(EmbeddingModel type, Corpus corpus, int size) throws IOException {
 		String id = getEmbeddingId(type, corpus, size);
 		if (alreadyLoaded.containsKey(id))
 			return alreadyLoaded.get(id);
@@ -45,11 +45,11 @@ public class EmbeddingLoader {
 		if (path == null)
 			throw new IllegalArgumentException("No model " + id);
 		
-		EmbeddingStrategy result;
+		Embedding result;
 		switch (type) {
 		case GLOVE:
-			System.out.println("Loading Glove " + path);
-			result = new EmbeddingStrategy.GloveWordE(path);
+			System.out.println("Loadcding Glove " + path);
+			result = new Embedding(new EmbeddingStrategy.GloveWordE(path));
 			System.out.println("Loaded!");
 			break;
 		default:

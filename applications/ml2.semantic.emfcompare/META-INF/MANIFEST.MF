@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Emfcompare
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-SymbolicName: ml2.semantic.emfcompare;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: ml2.semantic.emfcompare.Activator
@@ -13,5 +14,3 @@ Require-Bundle: org.eclipse.ui,
  ml2.worde4mde;bundle-version="1.0.0"
 Automatic-Module-Name: ml2.semantic.emfcompare
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: lib/mar-indexer-embeddings-1.0-SNAPSHOT-jar-with-dependencies.jar,
- .
