@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+import os
+
+PREFIX=os.getenv('SERVER_PREFIX', default = '')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('app/', include('app.urls'))
+    path(PREFIX + 'app/', include('app.urls'))
 ]
