@@ -173,7 +173,7 @@ def test_similarity_word2vec(args):
     colorDict = {}
     bag = ['petrinet', 'node', 'place', 'transition', 'arc', 'ptarc', 'tparc', 'token', 'weight',
            'source', 'target', 'nodes', 'arcs']
-    if len(bag) != 0:
+    if len(bag) == 0:
         vectors = []
         for x in bag:
             vectors.append(reloaded_word_vectors[x])
@@ -182,7 +182,7 @@ def test_similarity_word2vec(args):
     else:
         for i, word in enumerate(bag):
             if word in reloaded_word_vectors.key_to_index:
-                m_similar = ', '.join([p[0] for p in reloaded_word_vectors.most_similar(positive=[word])])
+                m_similar = ', '.join([p[0] for p in reloaded_word_vectors.most_similar(positive=[word], topn=5)])
                 for p in reloaded_word_vectors.most_similar(positive=[word]):
                     dict[p[0]] = reloaded_word_vectors[p[0]]
                     colorDict[p[0]] = i
