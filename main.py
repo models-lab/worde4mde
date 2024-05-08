@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from prettytable import PrettyTable
 
-from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_concepts, preprocess_sodump
+from data.preprocess import preprocess_dataset, preprocess_dataset_metamodel_concepts, preprocess_sodump, preprocess_wikipedia
 from modelset_evaluation.evaluation_classification_clustering import evaluation_metamodel_classification, \
     evaluation_metamodel_clustering
 from modelset_evaluation.evaluation_metamodel_concepts import evaluation_concepts, example_recommendation
@@ -29,7 +29,6 @@ def main(args):
         logger.info('Start preprocessing')
         tokenized_files = preprocess_sodump(args)
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
-        training_word2vec(args, tokenized_files)
         if args.modelType == 'word':
             training_word2vec(args, tokenized_files)
         elif args.modelType == 'fasttext':
@@ -38,6 +37,18 @@ def main(args):
         logger.info('Start preprocessing')
         tokenized_files = preprocess_sodump(args)
         tokenized_files2 = preprocess_dataset(args)
+        logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
+        tokenized_all = tokenized_files + tokenized_files2
+        random.shuffle(tokenized_all)
+        if args.modelType == 'word':
+            training_word2vec(args, tokenized_all)
+        elif args.modelType == 'fasttext':
+            training_fasttext(args, tokenized_all)
+    if args.train_modeling_wiki:
+        logger.info('Start preprocessing')
+        tokenized_files = preprocess_wikipedia(args)
+        tokenized_files2 = []
+        #tokenized_files2 = preprocess_dataset(args)
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
         tokenized_all = tokenized_files + tokenized_files2
         random.shuffle(tokenized_all)
@@ -131,6 +142,7 @@ if __name__ == '__main__':
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--train_sodump', help='Train w2v', action='store_true')
     parser.add_argument('--train_all', help='Train w2v', action='store_true')
+    parser.add_argument('--train_modeling_wiki', help='Train w2v', action='store_true')
     parser.add_argument('--test_similarity', help='Test similarity w2v', action='store_true')
     parser.add_argument('--evaluation_metamodel_classification', help='Evaluate embeddings in metamodel classification',
                         action='store_true')

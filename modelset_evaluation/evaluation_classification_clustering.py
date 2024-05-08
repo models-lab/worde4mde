@@ -15,6 +15,7 @@ from sklearn.metrics import balanced_accuracy_score, v_measure_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.svm import SVC
 from tqdm import tqdm
+import random
 
 from w2v.w2v import load_model, MODELS
 
@@ -118,6 +119,12 @@ def tokenizer(doc):
     words = [w2.lower() for w1 in words for w2 in camel_case_split(w1) if w2 != '']
     return words
 
+def seed_everything(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 def get_features_w2v(doc, model, dim=300):
     words = [w for w in tokenizer(doc) if w in model.key_to_index]
@@ -146,7 +153,7 @@ def get_features_fasttext_bin(doc, model, dim=300):
     vectors = np.stack([model.wv[w] for w in words])
     return np.mean(vectors, axis=0)
 
-def get_features_roberta(doc, model_tok):
+def get_features_roberta(doc, model_tok, dim=300):
     model, tokenizer_hf = model_tok
     model.train()
     words = [w for w in tokenizer(doc)]
@@ -190,12 +197,13 @@ def evaluation_metamodel_classification(args):
     X_models = {}
     for m in MODELS:
         print(m)
+        seed_everything(args.seed)
         w2v_model = load_model(m, args.embeddings_out)
         if m == 'roberta':
             X_models[m] = np.array([get_features_roberta(doc, w2v_model, args.dim_embed) for doc in corpus])
         elif m == "fasttext-mde":
             X_models[m] = np.array([get_features_fasttext(doc, w2v_model, args.dim_embed) for doc in corpus])
-        elif "fasttext" in m:
+        elif "fasttext" in m or m == 'stackoverflow_modeling' or m == 'fasttext_wikipedia_modelling':
             X_models[m] = np.array([get_features_fasttext_bin(doc, w2v_model, args.dim_embed) for doc in corpus])
         else:
             X_models[m] = np.array([get_features_w2v(doc, w2v_model, args.dim_embed) for doc in corpus])
@@ -207,6 +215,7 @@ def evaluation_metamodel_classification(args):
     for train_index, test_index in tqdm(skf.split(corpus, labels),
                                         desc='Iteration over folds', total=args.folds):
         for m in MODELS:
+            seed_everything(args.seed)
             X = X_models[m]
             X_train, X_val = X[train_index], X[test_index]
             y_train, y_val = np.array(labels)[train_index], np.array(labels)[test_index]
@@ -248,13 +257,14 @@ def evaluation_metamodel_clustering(args):
     corpus = [dataset.as_txt(i) for i in ids]
     X_models = {}
     for m in MODELS:
+        seed_everything(args.seed)
         w2v_model = load_model(m, args.embeddings_out)
         print(m)
         if m == 'roberta':
             X_models[m] = np.array([get_features_roberta(doc, w2v_model, args.dim_embed) for doc in corpus])
         elif m == "fasttext-mde":
             X_models[m] = np.array([get_features_fasttext(doc, w2v_model, args.dim_embed) for doc in corpus])
-        elif "fasttext" in m:
+        elif "fasttext" in m or m == 'stackoverflow_modeling' or m == 'fasttext_wikipedia_modelling':
             X_models[m] = np.array([get_features_fasttext_bin(doc, w2v_model, args.dim_embed) for doc in corpus])
         else:
             X_models[m] = np.array([get_features_w2v(doc, w2v_model, args.dim_embed) for doc in corpus])

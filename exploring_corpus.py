@@ -18,6 +18,7 @@ from wordcloud import WordCloud, STOPWORDS
 
 from data.preprocess import read_pdf, preprocess_doc
 from main import setup_logger
+from datasets import load_dataset
 
 
 def get_stop_words():
@@ -101,7 +102,7 @@ def modelling_statistics(args):
 
 def so_statistics(args):
     logger = logging.getLogger()
-    with open("./selection_all.txt", 'r') as file:
+    with open("./stackoverflow.txt", 'r') as file:
         lines = [l.strip() for l in file.readlines()]
         # Directorio donde estan todas las categorias
         directories = [d for d in os.listdir('/data2/sodump/all') if
@@ -110,34 +111,121 @@ def so_statistics(args):
         common_elements = set(lines) & set(directories)
         # Por cada directorio deseado me quedo con Posts y Comments
         dataset = []
-        for element in common_elements:
-            print("Preprocessing " + element)
-            postpath = '/data2/sodump/all/' + element + '/Posts.xml'
-            commentpath = '/data2/sodump/all/' + element + '/Comments.xml'
-            # Abro Posts
-            with open(postpath, 'r') as posts:
-                # Leo las lineas de Posts.
-                tree = ET.parse(posts)
-                root = tree.getroot()
-                campos_body = []
-                for e in root.findall(".//row"):
+        events_ = ('start', 'end')  # Yield on the start and end of a tag
+        events_ns = ('start', 'start-ns', 'end', 'end-ns')  # Yield on start and end of tags and namespaces
+        campos_body = []
+        campos_text = []
+        if "Posts" in element:
+            # with open(postpath, 'r') as posts:
+            # Create an an iterable
+
+            for event, e in ET.iterparse(postpath, events=events_):
+                if e.tag == "posts":
+                    continue
+                if event == 'start':
                     body = e.get("Body")
+                    re.sub(clean, '', body)
+                    # print(body)
                     if body is None:
                         raise ValueError(str(e))
-                    campos_body.append(body)
-            with open(commentpath, 'r') as comments:
-                # Leo las lineas de Comments.
-                tree = ET.parse(comments)
-                root = tree.getroot()
-                campos_text = []
-                for e in root.findall(".//row"):
+                    if random.random() < prob:
+                        campos_body.append(body)
+                if event == 'end':
+                    e.clear()
+        elif "Comments" in element:
+            for event, e in ET.iterparse(commentpath, events=events_):
+                if e.tag == "comments":
+                    continue
+                if event == 'start':
                     text = e.get("Text")
+                    re.sub(clean, '', text)
+                    # print(text)
                     if text is None:
                         raise ValueError(str(e))
-                    campos_text.append(text)
+                    if random.random() < prob:
+                        campos_text.append(text)
+                if event == 'end':
+                    e.clear()
 
-            dataset += campos_body + campos_text
+        # campos_body = random.sample(campos_body, round(len(campos_body) * (args.sample_size / 100)))
+        # campos_text = random.sample(campos_text, round(len(campos_text) * (args.sample_size / 100)))
+        dataset += campos_body + campos_text
 
+    tokenized_files = []
+    cnt = 0
+    for content in dataset:
+        cnt += 1
+        if cnt % 100000 == 0:
+            print(cnt)
+        tokens = preprocess_doc(content)
+
+        tokenized_files += tokens
+    # generate_wordcloud(sentences)
+    # topic_analysis(sentences)
+    unique_tokens = set([])
+    for sentence in tokenized_files:
+        for token in sentence:
+            unique_tokens.add(token)
+
+    logger.info(f'Number of topics: {len(common_elements)}')
+    logger.info(f'Number of posts/comments: {len(dataset)}')
+    logger.info(f'Number of sentences: {len(tokenized_files)}')
+    sent_lens = [len(sentence) for sentence in tokenized_files]
+    number_tokens = sum(sent_lens)
+    logger.info(f'Number of tokens: {number_tokens}')
+    logger.info(f'Number of unique tokens: {len(unique_tokens)}')
+    logger.info(f'Sentence length avg+-std: {np.mean(sent_lens):.4f} +- {np.std(sent_lens):.4f}')
+
+def se_statistics(args):
+    logger = logging.getLogger()
+    with open("./selection_technical.txt", 'r') as file:
+        lines = [l.strip() for l in file.readlines()]
+        # Directorio donde estan todas las categorias
+        directories = [d for d in os.listdir('/data2/sodump/all') if
+                       os.path.isdir(os.path.join('/data2/sodump/all', d))]
+        # Quiero su interseccion
+        common_elements = set(lines) & set(directories)
+        # Por cada directorio deseado me quedo con Posts y Comments
+        dataset = []
+        events_ = ('start', 'end')  # Yield on the start and end of a tag
+        events_ns = ('start', 'start-ns', 'end', 'end-ns')  # Yield on start and end of tags and namespaces
+        campos_body = []
+        campos_text = []
+        if "Posts" in element or True:
+            # with open(postpath, 'r') as posts:
+            # Create an an iterable
+
+            for event, e in ET.iterparse(postpath, events=events_):
+                if e.tag == "posts":
+                    continue
+                if event == 'start':
+                    body = e.get("Body")
+                    re.sub(clean, '', body)
+                    # print(body)
+                    if body is None:
+                        raise ValueError(str(e))
+                    if random.random() < prob:
+                        campos_body.append(body)
+                if event == 'end':
+                    e.clear()
+        elif "Comments" in element or True:
+            for event, e in ET.iterparse(commentpath, events=events_):
+                if e.tag == "comments":
+                    continue
+                if event == 'start':
+                    text = e.get("Text")
+                    re.sub(clean, '', text)
+                    # print(text)
+                    if text is None:
+                        raise ValueError(str(e))
+                    if random.random() < prob:
+                        campos_text.append(text)
+                if event == 'end':
+                    e.clear()
+
+        # campos_body = random.sample(campos_body, round(len(campos_body) * (args.sample_size / 100)))
+        # campos_text = random.sample(campos_text, round(len(campos_text) * (args.sample_size / 100)))
+        dataset += campos_body + campos_text
 
     tokenized_files = []
     cnt = 0
@@ -165,9 +253,34 @@ def so_statistics(args):
     logger.info(f'Sentence length avg+-std: {np.mean(sent_lens):.4f} +- {np.std(sent_lens):.4f}')
 
 
+def wiki_statistics(args):
+    logger = logging.getLogger()
+    wikipedia_dataset = load_dataset("wikipedia", "20220301.en", trust_remote_code=True)
+    logger.info(f'Number of pdfs: {len(wikipedia_dataset)}')
+
+    tokenized_files = []
+    for split_name, split_dataset in tqdm(wikipedia_dataset.items(), desc='Preprocessing wiki splits'):
+        for row in tqdm(split_dataset, desc='Preprocessing wiki files'):
+            tokenized_files += preprocess_doc(row["text"][:int(len(row["text"]) * 0.15)])
+    unique_tokens = set([])
+    for sentence in tokenized_files:
+        for token in sentence:
+            unique_tokens.add(token)
+
+    logger.info(f'Number of topics: {len(common_elements)}')
+    logger.info(f'Number of posts/comments: {len(dataset)}')
+    logger.info(f'Number of sentences: {len(tokenized_files)}')
+    sent_lens = [len(sentence) for sentence in tokenized_files]
+    number_tokens = sum(sent_lens)
+    logger.info(f'Number of tokens: {number_tokens}')
+    logger.info(f'Number of unique tokens: {len(unique_tokens)}')
+    logger.info(f'Sentence length avg+-std: {np.mean(sent_lens):.4f} +- {np.std(sent_lens):.4f}')
+
 def main(args):
-    #modelling_statistics(args)
-    so_statistics(args)
+    modelling_statistics(args)
+    #wiki_statistics(args)
+    se_statistics(args)
+    #so_statistics(args)
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Script for exploring the corpus')

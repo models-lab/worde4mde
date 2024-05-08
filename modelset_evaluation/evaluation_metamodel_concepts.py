@@ -11,12 +11,12 @@ from scipy import stats
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import random
 
 from w2v.w2v import load_model, MODELS
 
 KEYS_CONTEXT_TYPE = {"EPackage": 0, "EClass": 1, "EEnum": 2}
 logger = logging.getLogger()
-
 
 class RecommenderModel(nn.Module):
     def __init__(self, vectors, device):
@@ -52,7 +52,7 @@ def collate_fn(batch):
 def batch_indices_to_zeros(indices, model, m):
     list_zeros = []
     for b in indices:
-        if m == 'fasttext_bin' or m == 'fasttext-all':
+        if m == 'fasttext_bin' or m == 'fasttext-all' or m == 'stackoverflow_modeling' or m == 'fasttext_wikipedia_modelling':
             zeros = [0] * len(model.wv.key_to_index)
         else:
             zeros = [0] * len(model.key_to_index)
@@ -66,7 +66,7 @@ def batch_indices_to_zeros(indices, model, m):
 def items_to_keys(item, model, m):
     indices = []
     for r in item["recommendations"]:
-        if m == 'fasttext_bin' or m == 'fasttext-all':
+        if m == 'fasttext_bin' or m == 'fasttext-all' or m == 'stackoverflow_modeling' or m == 'fasttext_wikipedia_modelling':
             indices.append(model.wv.get_index(r))
             item_new = {"context": model.wv.get_index(item["context"]),
                         "recommendations_indices": indices,
@@ -83,6 +83,13 @@ def items_to_keys(item, model, m):
                         "context_type": KEYS_CONTEXT_TYPE[item["context_type"]]}
     return item_new
 
+def seed_everything(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
 
 THRESH = [3, 5, 10]
 
@@ -91,6 +98,7 @@ def evaluation_concepts(args, items):
     # load all models
     models = []
     for m in MODELS:
+        seed_everything(args.seed)
         w2v_model = load_model(m, args.embeddings_out)
         models.append((w2v_model, m))
 
@@ -104,7 +112,7 @@ def evaluation_concepts(args, items):
                                        shuffle=True,
                                        collate_fn=collate_fn,
                                        num_workers=0)
-        if m == 'fasttext_bin' or m == 'fasttext-all':
+        if m == 'fasttext_bin' or m == 'fasttext-all' or m == 'stackoverflow_modeling' or m == 'fasttext_wikipedia_modelling':
             recommender_model = RecommenderModel(np.array(w2v_model.wv.vectors), args.device).to(args.device)
         else:
             recommender_model = RecommenderModel(np.array(w2v_model.vectors), args.device).to(args.device)

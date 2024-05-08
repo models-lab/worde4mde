@@ -9,6 +9,7 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from tqdm import tqdm
 import xml.etree.ElementTree as ET
 import random
+from datasets import load_dataset
 
 from modelset_evaluation.evaluation_classification_clustering import set_up_modelset
 from w2v.w2v import MODELS, load_model
@@ -64,7 +65,7 @@ def preprocess_dataset(args):
     return result
 
 def preprocess_sodump(args):
-    with open("./stackoverflow.txt", 'r') as file:
+    with open("./selection_technical.txt", 'r') as file:
         # Que categorias quiero
         lines = [l.strip() for l in file.readlines()]
         #print(lines)
@@ -89,7 +90,7 @@ def preprocess_sodump(args):
             events_ns = ('start', 'start-ns', 'end', 'end-ns')  # Yield on start and end of tags and namespaces
             campos_body = []
             campos_text = []
-            if "Posts" in element:
+            if "Posts" in element or True:
                 #with open(postpath, 'r') as posts:
                 # Create an an iterable
 
@@ -106,7 +107,7 @@ def preprocess_sodump(args):
                             campos_body.append(body)
                     if event == 'end':
                         e.clear()
-            elif "Comments" in element:
+            elif "Comments" in element or True:
                 for event, e in ET.iterparse(commentpath, events=events_):
                     if e.tag == "comments":
                         continue
@@ -125,7 +126,6 @@ def preprocess_sodump(args):
             #campos_text = random.sample(campos_text, round(len(campos_text) * (args.sample_size / 100)))
             dataset += campos_body + campos_text
 
-
     # Dataset contiene todo.
     tokenized_files = []
     print("LONGITUD DATASET")
@@ -141,6 +141,15 @@ def preprocess_sodump(args):
         tokenized_files += tokens
     return tokenized_files
 
+def preprocess_wikipedia(args):
+    # Load HuggingFace wikipedia
+    wikipedia_dataset = load_dataset("wikipedia", "20220301.en", trust_remote_code=True)
+    tokenized_files = []
+    for split_name, split_dataset in tqdm(wikipedia_dataset.items(), desc='Preprocessing wiki splits'):
+        for row in tqdm(split_dataset, desc='Preprocessing wiki files'):
+            tokenized_files += preprocess_doc(row["text"][:int(len(row["text"]) * 0.15)])
+    return tokenized_files
+
 def load_data_metamodel_concepts(file_name):
     with open(file_name, "rb") as f:
         data = json.load(f)
@@ -149,7 +158,7 @@ def load_data_metamodel_concepts(file_name):
 
 def inside_vocabs(word, models):
     for (model, m) in models:
-        if m == 'fasttext_bin' or m == 'fasttext-all':
+        if m == 'fasttext_bin' or m == 'fasttext-all' or m == 'stackoverflow_modeling' or m == 'fasttext_wikipedia_modelling':
             if word not in model.wv.key_to_index:
                 return False
         else:
