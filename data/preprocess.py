@@ -64,20 +64,59 @@ def preprocess_dataset(args):
 
     return result
 
-def preprocess_sodump(args):
-    with open("./selection_technical.txt", 'r') as file:
+def consider_post(allowed_ids, post_id, parent_id, post_tags, wanted_tags):    
+    if wanted_tags is None:
+        print("No wanted tags")
+        return True
+
+    if post_tags is None:
+        if parent_id in allowed_ids:
+            print("Selected dependent: ", post_id)
+            allowed_ids.add(post_id)
+            return True
+    else:
+        # Example: "&lt;oop&gt;&lt;uml&gt;&lt;associations&gt;&lt;aggregation&gt;&lt;composition&gt;"
+        tag_list = post_tags.replace('<', '').split('>')[:-1]
+        if False and len(tag_list) > 0:
+            print(tag_list)
+            print(wanted_tags)
+            
+        for tag in tag_list:
+            for wanted in wanted_tags:
+                if wanted in tag.lower():
+                    allowed_ids.add(post_id)
+                    print("Selected ", post_id, " ", tag_list)
+                    return True
+        return False
+    
+def preprocess_sodump(args, selection_file, tags = None):
+    fname = args
+    wanted_tags = None
+    allowed_ids = set()
+    if tags is not None:
+        wanted_tags = [s.strip().lower() for s in tags.split(',')]
+        logging.getLogger().info(f'Training with tags: ' + ",".join(wanted_tags))
+
+    with open(selection_file, 'r') as file:
         # Que categorias quiero
         lines = [l.strip() for l in file.readlines()]
         #print(lines)
         # Directorio donde estan todas las categorias
-        directories = [d for d in os.listdir('/data2/sodump/all') if
-                       os.path.isdir(os.path.join('/data2/sodump/all', d))]
+#        directories = [d for d in os.listdir('/data2/sodump/all') if
+#                       os.path.isdir(os.path.join('/data2/sodump/all', d))]
         # Quiero su interseccion
-        common_elements = set(lines) & set(directories)
+#        common_elements = set(lines) & set(directories)
         # Por cada directorio deseado me quedo con Posts y Comments
         dataset = []
         clean = re.compile('<.*?>')
         prob = args.sample_size / 100
+
+        common_elements = lines
+        print(common_elements)
+        
+#        common_elements = ['stackoverflow.com-Posts', 'stackoverflow.com-Comments']
+                           
+        
         for element in common_elements:
             print("Preprocessing " + element)
             postpath = '/data2/sodump/all/' + element + '/Posts.xml'
@@ -93,18 +132,23 @@ def preprocess_sodump(args):
             if "Posts" in element or True:
                 #with open(postpath, 'r') as posts:
                 # Create an an iterable
-
+                print("Processing paths: ", postpath)
                 for event, e in ET.iterparse(postpath, events=events_):
                     if e.tag == "posts":
                         continue
                     if event == 'start':
-                        body = e.get("Body")
-                        re.sub(clean, '', body)
-                        #print(body)
-                        if body is None:
-                            raise ValueError(str(e))
-                        if random.random() < prob:
-                            campos_body.append(body)
+                        post_id = e.get("Id")
+                        parent_id = e.get("ParentId")
+                        post_tags = e.get("Tags")               
+
+                        if consider_post(allowed_ids, post_id, parent_id, post_tags, wanted_tags):
+                            body = e.get("Body")
+                            re.sub(clean, '', body)
+                            #print(body)
+                            if body is None:
+                                raise ValueError(str(e))
+                            if wanted_tags is not None or random.random() < prob:
+                                campos_body.append(body)
                     if event == 'end':
                         e.clear()
             elif "Comments" in element or True:
@@ -112,13 +156,15 @@ def preprocess_sodump(args):
                     if e.tag == "comments":
                         continue
                     if event == 'start':
-                        text = e.get("Text")
-                        re.sub(clean, '', text)
-                        #print(text)
-                        if text is None:
-                            raise ValueError(str(e))
-                        if random.random() < prob:
-                            campos_text.append(text)
+                        post_id = e.get("PostId")
+                        if wanted_tags is None or post_id in allowed_ids:
+                            text = e.get("Text")
+                            re.sub(clean, '', text)
+                            #print(text)
+                            if text is None:
+                                raise ValueError(str(e))
+                            if wanted_tags is not None or random.random() < prob:
+                                campos_text.append(text)
                     if event == 'end':
                         e.clear()
 

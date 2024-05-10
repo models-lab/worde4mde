@@ -45,12 +45,9 @@ MODELS = [
     # 'sgram-mde-100',
     # 'sgram-mde-200',
     # 'skip_gram-mde',
-    # 'sgram-mde-400',
-    # 'sgram-mde-500',
-    # 'stackoverflow_modeling',
-    # 'fasttext_wikipedia_modelling',
-    # 'fasttext-se',
-    #
+    # 'fasttext-so-tagged',
+    # 'sgram-so-tagged',
+    # 'fasttext-mde-so-tagged'
 ]
 
 PATHS = {
@@ -80,6 +77,11 @@ PATHS = {
     'fasttext_wikipedia_modelling': 'out/fasttext_wikipedia_modelling/fasttext_model.bin',
     'fasttext-se': 'out/fasttext-se/fasttext_model.bin',
     'sgram-se': 'out/sgram-se/skip_gram_vectors.kv',
+    # New-SO
+    'fasttext-so-tagged': 'out/fasttext_so_tagged/fasttext_model.bin',
+    'sgram-so-tagged': 'out/fasttext_so_tagged/skip_gram_vectors.kv',
+    'fasttext-mde-so-tagged': 'out/fasttext_mde_so_tagged/fasttext_model.bin',
+    'sgram-mde-so-tagged': 'out/fasttext_mde_so_tagged/skip_gram_vectors.kv'
 }
 
 
@@ -128,8 +130,8 @@ def load_model(model, embeddings_out=None):
     print(model)
     #    'fasttext-sodump',
     #    'fasttext-all',
-
-    if model == 'skip_gram-mde' or model == 'sgram-se':
+    
+    if model == 'skip_gram-mde' or model.startswith('sgram-'):
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'cbow-mde':
         reloaded_word_vectors = KeyedVectors.load(PATHS[model])

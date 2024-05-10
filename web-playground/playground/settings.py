@@ -121,6 +121,7 @@ USE_TZ = True
 
 PREFIX = os.getenv('SERVER_PREFIX', '')
 STATIC_URL = PREFIX + "static/" # 'static/'
+STATIC_URL="http://models-lab.inf.um.es/files/static-webplayground/"
 #STATIC_ROOT = "/home/jesus/projects/mde-ml/word2vec-mde/web-playground/static" #os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = [
     BASE_DIR / "static",

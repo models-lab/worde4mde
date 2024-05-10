@@ -25,9 +25,16 @@ def main(args):
             training_word2vec(args, tokenized_files)
         elif args.modelType == 'fasttext':
             training_fasttext(args, tokenized_files)
-    if args.train_sodump:
+    if args.train_sodump or args.train_sedump:
         logger.info('Start preprocessing')
-        tokenized_files = preprocess_sodump(args)
+        if args.train_sodump:
+            tags = args.tags
+            selection_file = args.so_selection
+        else:
+            tags = None
+            selection_file = args.se_selection
+            
+        tokenized_files = preprocess_sodump(args, selection_file, tags)
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
         if args.modelType == 'word':
             training_word2vec(args, tokenized_files)
@@ -35,10 +42,12 @@ def main(args):
             training_fasttext(args, tokenized_files)
     if args.train_all:
         logger.info('Start preprocessing')
-        tokenized_files = preprocess_sodump(args)
-        tokenized_files2 = preprocess_dataset(args)
-        logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
-        tokenized_all = tokenized_files + tokenized_files2
+        tokenized_files1 = preprocess_sedump(args, args.se_selection, None)                
+        tokenized_files2 = preprocess_sodump(args, args.so_selection, args.tags)
+        tokenized_files3 = preprocess_dataset(args)
+
+        tokenized_all = tokenized_files1 + tokenized_files2 + tokenized_files3
+        logger.info(f'Finish preprocessing, number of lines: {len(tokenized_all)}')        
         random.shuffle(tokenized_all)
         if args.modelType == 'word':
             training_word2vec(args, tokenized_all)
@@ -140,7 +149,11 @@ if __name__ == '__main__':
     parser.add_argument('--sample_size', type=int, default=100,
                         help='Set the sample percentage')
     parser.add_argument('--train', help='Train w2v', action='store_true')
-    parser.add_argument('--train_sodump', help='Train w2v', action='store_true')
+    parser.add_argument('--train_sodump', help='Train with the StackOverflow dump', action='store_true')
+    parser.add_argument('--train_sedump', help='Train with the StackOverflow dump', action='store_true')    
+    parser.add_argument('--so_selection', help='Selection of stackexchange items', default='./selection_technical.txt')
+    parser.add_argument('--se_selection', help='Selection of stackoverflow items', default='./selection_stackoverflow.txt')
+    parser.add_argument('--tags', help='StackOverflow/Exchange tags', default=None)
     parser.add_argument('--train_all', help='Train w2v', action='store_true')
     parser.add_argument('--train_modeling_wiki', help='Train w2v', action='store_true')
     parser.add_argument('--test_similarity', help='Test similarity w2v', action='store_true')
