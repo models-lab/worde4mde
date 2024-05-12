@@ -66,7 +66,6 @@ def preprocess_dataset(args):
 
 def consider_post(allowed_ids, post_id, parent_id, post_tags, wanted_tags):    
     if wanted_tags is None:
-        print("No wanted tags")
         return True
 
     if post_tags is None:
@@ -89,7 +88,7 @@ def consider_post(allowed_ids, post_id, parent_id, post_tags, wanted_tags):
                     return True
         return False
     
-def preprocess_sodump(args, selection_file, tags = None):
+def preprocess_sodump(args, selection_file, tags = None, use_comments = True):
     fname = args
     wanted_tags = None
     allowed_ids = set()
@@ -119,6 +118,8 @@ def preprocess_sodump(args, selection_file, tags = None):
         
         for element in common_elements:
             print("Preprocessing " + element)
+            print("Current length ", len(dataset))
+            
             postpath = '/data2/sodump/all/' + element + '/Posts.xml'
             commentpath = '/data2/sodump/all/' + element + '/Comments.xml'
 
@@ -129,7 +130,8 @@ def preprocess_sodump(args, selection_file, tags = None):
             events_ns = ('start', 'start-ns', 'end', 'end-ns')  # Yield on start and end of tags and namespaces
             campos_body = []
             campos_text = []
-            if "Posts" in element or True:
+            
+            if os.path.isfile(postpath):
                 #with open(postpath, 'r') as posts:
                 # Create an an iterable
                 print("Processing paths: ", postpath)
@@ -140,7 +142,6 @@ def preprocess_sodump(args, selection_file, tags = None):
                         post_id = e.get("Id")
                         parent_id = e.get("ParentId")
                         post_tags = e.get("Tags")               
-
                         if consider_post(allowed_ids, post_id, parent_id, post_tags, wanted_tags):
                             body = e.get("Body")
                             re.sub(clean, '', body)
@@ -151,7 +152,8 @@ def preprocess_sodump(args, selection_file, tags = None):
                                 campos_body.append(body)
                     if event == 'end':
                         e.clear()
-            elif "Comments" in element or True:
+            if use_comments and os.path.isfile(commentpath):
+                print("Processing comments", commentpath)
                 for event, e in ET.iterparse(commentpath, events=events_):
                     if e.tag == "comments":
                         continue

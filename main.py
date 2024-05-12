@@ -42,10 +42,9 @@ def main(args):
             training_fasttext(args, tokenized_files)
     if args.train_all:
         logger.info('Start preprocessing')
-        tokenized_files1 = preprocess_sedump(args, args.se_selection, None)                
+        tokenized_files1 = preprocess_sodump(args, args.se_selection, None)
         tokenized_files2 = preprocess_sodump(args, args.so_selection, args.tags)
         tokenized_files3 = preprocess_dataset(args)
-
         tokenized_all = tokenized_files1 + tokenized_files2 + tokenized_files3
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_all)}')        
         random.shuffle(tokenized_all)
@@ -151,8 +150,8 @@ if __name__ == '__main__':
     parser.add_argument('--train', help='Train w2v', action='store_true')
     parser.add_argument('--train_sodump', help='Train with the StackOverflow dump', action='store_true')
     parser.add_argument('--train_sedump', help='Train with the StackOverflow dump', action='store_true')    
-    parser.add_argument('--so_selection', help='Selection of stackexchange items', default='./selection_technical.txt')
-    parser.add_argument('--se_selection', help='Selection of stackoverflow items', default='./selection_stackoverflow.txt')
+    parser.add_argument('--se_selection', help='Selection of stackexchange items', default='./selection_technical.txt')
+    parser.add_argument('--so_selection', help='Selection of stackoverflow items', default='./selection_stackoverflow.txt')
     parser.add_argument('--tags', help='StackOverflow/Exchange tags', default=None)
     parser.add_argument('--train_all', help='Train w2v', action='store_true')
     parser.add_argument('--train_modeling_wiki', help='Train w2v', action='store_true')

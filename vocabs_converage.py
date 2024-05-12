@@ -96,8 +96,8 @@ def main(args):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Script for exploring the embeddings')
-    parser.add_argument('--corpus', default='./docs/modelling',
-                        help='Path to the w2v dataset')
+    #parser.add_argument('--corpus', default='./docs/modelling',
+    #                    help='Path to the w2v dataset')
     parser.add_argument('--log_file', default='info_exploring_vocab.log',
                         help='Log file')
     parser.add_argument('--remove_duplicates', help='Remove duplicate models', action='store_true')

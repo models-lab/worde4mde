@@ -23,10 +23,10 @@ GLOVE_VECTORS_NAME = 'vectors.txt'
 SKIP_GRAM_VECTORS = 'skip_gram_vectors.kv'
 CBOW_VECTORS = 'cbow_vectors.kv'
 MODELS = [
-    'glove-wiki-gigaword-300',
+    #'glove-wiki-gigaword-300',
     # 'glove-mde',
     # 'word2vec-google-news-300',
-    'skip_gram-mde',
+    #'skip_gram-mde',
     # 'so_word2vec',
     # sgram-se',
     # 'average',
@@ -47,7 +47,10 @@ MODELS = [
     # 'skip_gram-mde',
     # 'fasttext-so-tagged',
     # 'sgram-so-tagged',
-    # 'fasttext-mde-so-tagged'
+    # 'fasttext-mde-so-tagged',
+    # 'fasttext-mde-se-so-tagged',
+    'sgram-mde-se-so-tagged'
+    
 ]
 
 PATHS = {
@@ -81,8 +84,39 @@ PATHS = {
     'fasttext-so-tagged': 'out/fasttext_so_tagged/fasttext_model.bin',
     'sgram-so-tagged': 'out/fasttext_so_tagged/skip_gram_vectors.kv',
     'fasttext-mde-so-tagged': 'out/fasttext_mde_so_tagged/fasttext_model.bin',
-    'sgram-mde-so-tagged': 'out/fasttext_mde_so_tagged/skip_gram_vectors.kv'
+    'sgram-mde-so-tagged': 'out/fasttext_mde_so_tagged/skip_gram_vectors.kv',
+    'sgram-mde-se-so-tagged': 'out/sgram_mde_se_so_tagged/skip_gram_vectors.kv',
+    'fasttext-mde-se-so-tagged': 'out/sgram_mde_se_so_tagged/fasttext_model.bin'
 }
+
+
+MODELS = [
+   # 'fasttext-mde',
+   # 'fasttext-mde-so',    
+   # 'fasttext-se',
+   # 'fasttext-se-mde',
+   # 'fasttext-mde-se-so'
+   # 'fasttext-so',
+    'glove-mde',
+    'sgram-mde',
+    'sgram-mde-se-so',
+    'sgram-mde-so',
+    'sgram-se',
+    'sgram-se-mde',
+    'sgram-so'
+]
+
+FOLDER = '/data/worde4mde/embeddings-sosym'
+PATHS = { }
+for m in MODELS:
+    if 'fasttext' in m:
+        PATHS[m] = os.path.join(FOLDER, m, 'fasttext_model.bin')
+    elif 'sgram' in m:
+        PATHS[m] = os.path.join(FOLDER, m, 'skip_gram_vectors.kv')
+    elif 'glove' in m:
+        PATHS[m] = os.path.join(FOLDER, m, 'vectors.txt')
+    else:
+        raise ValueError('Invalid model type ' + m)
 
 
 def training_word2vec(args, sentences):
@@ -140,8 +174,8 @@ def load_model(model, embeddings_out=None):
         tmp_file = get_tmpfile("test_word2vec.txt")
         _ = glove2word2vec(glove_file, tmp_file)
         reloaded_word_vectors = KeyedVectors.load_word2vec_format(tmp_file)
-    elif model == 'fasttext-mde':
-        reloaded_word_vectors = KeyedVectors.load(PATHS[model])
+    #elif model == 'fasttext-mde':
+    #    reloaded_word_vectors = KeyedVectors.load(PATHS[model])
     elif model == 'so_word2vec':
         reloaded_word_vectors = KeyedVectors.load_word2vec_format(PATHS[model], binary=True)
     elif model == 'average':

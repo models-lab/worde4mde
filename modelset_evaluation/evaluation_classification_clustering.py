@@ -201,8 +201,8 @@ def evaluation_metamodel_classification(args):
         w2v_model = load_model(m, args.embeddings_out)
         if m == 'roberta':
             X_models[m] = np.array([get_features_roberta(doc, w2v_model, args.dim_embed) for doc in corpus])
-        elif m == "fasttext-mde":
-            X_models[m] = np.array([get_features_fasttext(doc, w2v_model, args.dim_embed) for doc in corpus])
+        #elif m == "fasttext-mde":
+        #    X_models[m] = np.array([get_features_fasttext(doc, w2v_model, args.dim_embed) for doc in corpus])
         elif "fasttext" in m or m == 'stackoverflow_modeling' or m == 'fasttext_wikipedia_modelling':
             X_models[m] = np.array([get_features_fasttext_bin(doc, w2v_model, args.dim_embed) for doc in corpus])
         else:
@@ -262,8 +262,8 @@ def evaluation_metamodel_clustering(args):
         print(m)
         if m == 'roberta':
             X_models[m] = np.array([get_features_roberta(doc, w2v_model, args.dim_embed) for doc in corpus])
-        elif m == "fasttext-mde":
-            X_models[m] = np.array([get_features_fasttext(doc, w2v_model, args.dim_embed) for doc in corpus])
+        #elif m == "fasttext-mde":
+        #    X_models[m] = np.array([get_features_fasttext(doc, w2v_model, args.dim_embed) for doc in corpus])
         elif "fasttext" in m or m == 'stackoverflow_modeling' or m == 'fasttext_wikipedia_modelling':
             X_models[m] = np.array([get_features_fasttext_bin(doc, w2v_model, args.dim_embed) for doc in corpus])
         else:
