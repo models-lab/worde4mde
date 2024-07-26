@@ -115,6 +115,8 @@ for m in MODELS:
         PATHS[m] = os.path.join(FOLDER, m, 'skip_gram_vectors.kv')
     elif 'glove' in m:
         PATHS[m] = os.path.join(FOLDER, m, 'vectors.txt')
+    elif 'glove-wiki-gigaword-300' == m or 'word2vec-google-news-300' == m:
+        PATHS[m] = None
     else:
         raise ValueError('Invalid model type ' + m)
 
