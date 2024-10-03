@@ -6,6 +6,8 @@ from collections import defaultdict
 from pprint import pprint
 import xml.etree.ElementTree as ET
 
+from collections import Counter
+
 import os
 import gensim
 import matplotlib.pyplot as plt
@@ -19,7 +21,7 @@ from wordcloud import WordCloud, STOPWORDS
 from data.preprocess import read_pdf, preprocess_doc
 from main import setup_logger
 from datasets import load_dataset
-
+from data.preprocess import preprocess_sodump
 
 def get_stop_words():
     with open('stopwords.txt') as f:
@@ -59,7 +61,7 @@ def number_of_pages(file):
 
 def modelling_statistics(args):
     logger = logging.getLogger()
-    files = glob.glob(args.corpus + "/**/*.pdf", recursive=True)
+    files = glob.glob(args.corpus_folder + "/**/*.pdf", recursive=True)
     logger.info(f'Number of pdfs: {len(files)}')
 
     sentences = []
@@ -99,6 +101,11 @@ def modelling_statistics(args):
 
     with open('tokens_per_venue.pkl', 'wb') as f:
         pickle.dump(tokens_per_venue, f)
+
+    with open("unique_words_modeling.txt", "w") as f:
+        for word in unique_tokens:
+            f.write(word + "\n")
+
 
 def so_statistics(args):
     logger = logging.getLogger()
@@ -252,6 +259,33 @@ def se_statistics(args):
     logger.info(f'Number of unique tokens: {len(unique_tokens)}')
     logger.info(f'Sentence length avg+-std: {np.mean(sent_lens):.4f} +- {np.std(sent_lens):.4f}')
 
+def stack_statistics(args, selection_file, tags = None):
+    tokenized_files, stats = preprocess_sodump(args, selection_file, tags)
+
+    most_common_words = stats.unique_words.most_common(500)
+    most_common_tags = stats.tag_counter.most_common(20)
+
+    token_counter = stats.unique_words
+    token_counter = Counter({word: count for word, count in token_counter.items() if count >= 10})
+
+    logger = logging.getLogger()
+    logger.info(f'Number of posts/comments: {stats.num_posts}')
+    logger.info(f'Number of sentences: {stats.num_sentences}')
+    logger.info(f'Number of tokens: {stats.num_tokens}')
+    logger.info(f'Number of unique tokens: {stats.num_unique_words}')
+    logger.info(f'Number of unique tokens (>10): {len(token_counter)}')
+    logger.info(f'Most common words: {most_common_words}')
+    logger.info(f'Most common tags: {most_common_tags}')
+    logger.info(f'Sentence length avg+-std: {stats.avg_sentence_length:.4f} +- {stats.std_sentence_length:.4f}')
+
+    with open("unique_words.txt", "w") as f:
+        for word in token_counter:
+            f.write(word + "\n")
+
+    with open("tags.txt", "w") as f:
+        for word in stats.tag_counter:
+            f.write(word + "\n")
+
 
 def wiki_statistics(args):
     logger = logging.getLogger()
@@ -277,17 +311,39 @@ def wiki_statistics(args):
     logger.info(f'Sentence length avg+-std: {np.mean(sent_lens):.4f} +- {np.std(sent_lens):.4f}')
 
 def main(args):
-    modelling_statistics(args)
+    #modelling_statistics(args)
     #wiki_statistics(args)
-    se_statistics(args)
+    #se_statistics(args)
     #so_statistics(args)
+
+    if args.corpus == 'so':
+        stack_statistics(args, args.so_selection, args.tags)
+    elif args.corpus == 'se':
+        stack_statistics(args, args.se_selection)
+    elif args.corpus == 'modeling':
+        modelling_statistics(args)
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Script for exploring the corpus')
-    parser.add_argument('--corpus', default='./docs/modelling',
+
+    parser.add_argument('--corpus', required=True,
+                        help='What to analyse: modeling, so, se')
+
+    parser.add_argument('--corpus_folder', default='./docs/modelling',
                         help='Path to the w2v dataset')
     parser.add_argument('--log_file', default='info_exploring.log',
                         help='Log file')
+
+    parser.add_argument('--sample_size', type=int, default=100,
+                        help='Set the sample percentage')
+
+    parser.add_argument('--se_selection', help='Selection of stackexchange items', default='./selection_technical.txt')
+    parser.add_argument('--so_selection', help='Selection of stackoverflow items',
+                        default='./selection_stackoverflow.txt')
+    parser.add_argument('--tags', help='StackOverflow/Exchange tags', default=None)
+
+
+
     args = parser.parse_args()
     setup_logger(args.log_file)
     main(args)

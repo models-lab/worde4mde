@@ -34,7 +34,7 @@ def main(args):
             tags = None
             selection_file = args.se_selection
             
-        tokenized_files = preprocess_sodump(args, selection_file, tags)
+        tokenized_files, stats = preprocess_sodump(args, selection_file, tags)
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_files)}')
         if args.modelType == 'word':
             training_word2vec(args, tokenized_files)
@@ -42,8 +42,8 @@ def main(args):
             training_fasttext(args, tokenized_files)
     if args.train_all:
         logger.info('Start preprocessing')
-        tokenized_files1 = preprocess_sodump(args, args.se_selection, None)
-        tokenized_files2 = preprocess_sodump(args, args.so_selection, args.tags)
+        tokenized_files1, stats1 = preprocess_sodump(args, args.se_selection, None)
+        tokenized_files2, stats2 = preprocess_sodump(args, args.so_selection, args.tags)
         tokenized_files3 = preprocess_dataset(args)
         tokenized_all = tokenized_files1 + tokenized_files2 + tokenized_files3
         logger.info(f'Finish preprocessing, number of lines: {len(tokenized_all)}')        
@@ -74,6 +74,7 @@ def main(args):
         items = preprocess_dataset_metamodel_concepts(args)
         logger.info(f'Finish preprocessing, number of items: {len(items)}')
         logger.info(f'Context type: {args.context_type}')
+        
         avg = np.mean([len(item['recommendations']) for item in items])
         std = np.std([len(item['recommendations']) for item in items])
         logger.info(f'Avg recommendations: {avg}+-{std}')

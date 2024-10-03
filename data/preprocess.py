@@ -10,9 +10,11 @@ from tqdm import tqdm
 import xml.etree.ElementTree as ET
 import random
 from datasets import load_dataset
+import numpy as np
 
 from modelset_evaluation.evaluation_classification_clustering import set_up_modelset
 from w2v.w2v import MODELS, load_model
+from collections import namedtuple, Counter
 
 def read_pdf(file):
     with open(file, "rb") as f:
@@ -87,8 +89,11 @@ def consider_post(allowed_ids, post_id, parent_id, post_tags, wanted_tags):
                     print("Selected ", post_id, " ", tag_list)
                     return True
         return False
-    
-def preprocess_sodump(args, selection_file, tags = None, use_comments = True):
+
+Stats = namedtuple("Stats", ["num_posts", "num_sentences", "num_tokens",
+                             "num_unique_words", "unique_words", "avg_sentence_length", "std_sentence_length", "tag_counter"])
+
+def preprocess_sodump(args, selection_file, tags=None, use_comments=True):
     fname = args
     wanted_tags = None
     allowed_ids = set()
@@ -115,7 +120,9 @@ def preprocess_sodump(args, selection_file, tags = None, use_comments = True):
         
 #        common_elements = ['stackoverflow.com-Posts', 'stackoverflow.com-Comments']
                            
-        
+        number_posts = 0
+        tag_counter = Counter()
+
         for element in common_elements:
             print("Preprocessing " + element)
             print("Current length ", len(dataset))
@@ -150,6 +157,14 @@ def preprocess_sodump(args, selection_file, tags = None, use_comments = True):
                                 raise ValueError(str(e))
                             if wanted_tags is not None or random.random() < prob:
                                 campos_body.append(body)
+                                number_posts += 1
+
+                                if post_tags is not None:
+                                    tag_list = post_tags.replace('<', '').split('>')[:-1]
+                                    for t in tag_list:
+                                        tag_counter[t] += 1
+
+
                     if event == 'end':
                         e.clear()
             if use_comments and os.path.isfile(commentpath):
@@ -167,6 +182,8 @@ def preprocess_sodump(args, selection_file, tags = None, use_comments = True):
                                 raise ValueError(str(e))
                             if wanted_tags is not None or random.random() < prob:
                                 campos_text.append(text)
+                                number_posts += 1
+
                     if event == 'end':
                         e.clear()
 
@@ -179,15 +196,32 @@ def preprocess_sodump(args, selection_file, tags = None, use_comments = True):
     print("LONGITUD DATASET")
     print(len(dataset))
     cnt = 0
+    token_counter = Counter()
     for content in dataset:
         # Eliminar tags.
         cnt += 1
         if cnt % 100000 == 0:
             print(cnt)
-        tokens = preprocess_doc(content)
 
+        tokens = preprocess_doc(content)
         tokenized_files += tokens
-    return tokenized_files
+
+        for line in tokens:
+            for t in line:
+                token_counter[t] += 1
+
+    number_of_sentences = len(tokenized_files)
+    sent_lens = [len(sentence) for sentence in tokenized_files]
+    number_tokens = sum(sent_lens)
+
+    unique_words = len(token_counter)
+    # most_common_words = token_counter(text, num_words=50)
+    average_sentence_length = np.mean(sent_lens)
+    std_sentence_length = np.std(sent_lens)
+
+    stats = Stats(number_posts, number_of_sentences, number_tokens, unique_words, token_counter, average_sentence_length, std_sentence_length, tag_counter)
+
+    return tokenized_files, stats
 
 def preprocess_wikipedia(args):
     # Load HuggingFace wikipedia
@@ -230,7 +264,7 @@ def preprocess_dataset_metamodel_concepts(args):
     for file_name in tqdm(files, desc='Preprocessing files'):
         data = load_data_metamodel_concepts(file_name)
         result += data
-
+        
     models = []
     for m in MODELS:
         w2v_model = load_model(m, args.embeddings_out)

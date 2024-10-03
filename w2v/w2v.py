@@ -91,12 +91,16 @@ PATHS = {
 
 
 MODELS = [
+    'glove-wiki-gigaword-300',
+    'word2vec-google-news-300',
+    
    # 'fasttext-mde',
    # 'fasttext-mde-so',    
    # 'fasttext-se',
    # 'fasttext-se-mde',
    # 'fasttext-mde-se-so'
    # 'fasttext-so',
+    
     'glove-mde',
     'sgram-mde',
     'sgram-mde-se-so',

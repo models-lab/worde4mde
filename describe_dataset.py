@@ -5,7 +5,7 @@ from modelset_evaluation.evaluation_classification_clustering import set_up_mode
 
 def main(args):
     modelset_df, dataset = set_up_modelset(args)
-
+    print(modelset_df)
     print(f'Number of models: {len(modelset_df)}')
     print(f'Number of categories: {len(modelset_df.category.unique())}')
     print(f'Avg number of elements: {modelset_df.elements.mean():.2f}')
