@@ -3,12 +3,12 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements_contents = fh.read().split("\n")
+#with open("requirements.txt", "r", encoding="utf-8") as fh:
+#    requirements_contents = fh.read().split("\n")
 
 setuptools.setup(
     name="worde4mde",
-    version="1.0",
+    version="1.1",
     author="Jesús Sánchez Cuadrado",
     author_email="jesusc@um.es",
     description="Embeddings for software modeling",
@@ -26,5 +26,5 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.0",
-    install_requires=requirements_contents
+#    install_requires=requirements_contents
 )
